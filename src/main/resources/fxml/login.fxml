@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<VBox xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.coursemanagement.controller.LoginController"
+      prefHeight="600.0" prefWidth="400.0"
+      style="-fx-background-color: linear-gradient(to bottom, #667eea 0%, #764ba2 100%);">
+    <children>
+        <VBox alignment="CENTER" spacing="30.0" VBox.vgrow="ALWAYS">
+            <children>
+                <VBox alignment="CENTER" spacing="10.0">
+                    <children>
+                        <Label text="Course Management" textFill="WHITE">
+                            <font>
+                                <Font name="System Bold" size="28.0" />
+                            </font>
+                        </Label>
+                        <Label text="Learn. Grow. Succeed." textFill="#E8E8E8">
+                            <font>
+                                <Font size="14.0" />
+                            </font>
+                        </Label>
+                    </children>
+                </VBox>
+
+                <TabPane fx:id="tabPane" prefHeight="300.0" prefWidth="350.0"
+                         style="-fx-background-color: white; -fx-border-radius: 10; -fx-background-radius: 10;">
+                    <tabs>
+                        <Tab text="Login" closable="false">
+                            <content>
+                                <VBox alignment="CENTER" spacing="20.0" style="-fx-background-color: white; -fx-background-radius: 10;">
+                                    <padding>
+                                        <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+                                    </padding>
+                                    <children>
+                                        <VBox spacing="15.0">
+                                            <children>
+                                                <TextField fx:id="usernameField" promptText="Username"
+                                                           style="-fx-padding: 12; -fx-border-color: #ddd; -fx-border-radius: 5; -fx-background-radius: 5;" />
+                                                <PasswordField fx:id="passwordField" promptText="Password"
+                                                               style="-fx-padding: 12; -fx-border-color: #ddd; -fx-border-radius: 5; -fx-background-radius: 5;" />
+                                            </children>
+                                        </VBox>
+                                        <Button onAction="#handleLogin" prefWidth="200.0" text="Login"
+                                                style="-fx-background-color: #667eea; -fx-text-fill: white; -fx-padding: 12; -fx-border-radius: 25; -fx-background-radius: 25; -fx-font-size: 14px; -fx-font-weight: bold;" />
+                                    </children>
+                                </VBox>
+                            </content>
+                        </Tab>
+
+                        <Tab text="Register" closable="false">
+                            <content>
+                                <VBox alignment="CENTER" spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 10;">
+                                    <padding>
+                                        <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
+                                    </padding>
+                                    <children>
+                                        <VBox spacing="12.0">
+                                            <children>
+                                                <TextField fx:id="regUsernameField" promptText="Username"
+                                                           style="-fx-padding: 10; -fx-border-color: #ddd; -fx-border-radius: 5; -fx-background-radius: 5;" />
+                                                <TextField fx:id="regEmailField" promptText="Email"
+                                                           style="-fx-padding: 10; -fx-border-color: #ddd; -fx-border-radius: 5; -fx-background-radius: 5;" />
+                                                <TextField fx:id="regFullNameField" promptText="Full Name"
+                                                           style="-fx-padding: 10; -fx-border-color: #ddd; -fx-border-radius: 5; -fx-background-radius: 5;" />
+                                                <PasswordField fx:id="regPasswordField" promptText="Password"
+                                                               style="-fx-padding: 10; -fx-border-color: #ddd; -fx-border-radius: 5; -fx-background-radius: 5;" />
+                                            </children>
+                                        </VBox>
+                                        <Button onAction="#handleRegister" prefWidth="200.0" text="Create Account"
+                                                style="-fx-background-color: #764ba2; -fx-text-fill: white; -fx-padding: 10; -fx-border-radius: 25; -fx-background-radius: 25; -fx-font-size: 14px; -fx-font-weight: bold;" />
+                                    </children>
+                                </VBox>
+                            </content>
+                        </Tab>
+                    </tabs>
+                </TabPane>
+            </children>
+            <padding>
+                <Insets bottom="50.0" left="25.0" right="25.0" top="50.0" />
+            </padding>
+        </VBox>
+    </children>
+</VBox>

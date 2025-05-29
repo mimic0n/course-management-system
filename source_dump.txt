@@ -1,0 +1,82 @@
+# ==================================================
+# Path: C:\Users\Admin\IdeaProjects\coursemngDACS1
+# Detected tech: java
+# ==================================================
+
+## DIRECTORY STRUCTURE
+```
+coursemngDACS1/
+├── .idea/
+├── .mvn/
+│   └── wrapper/
+│       ├── maven-wrapper.jar
+│       └── maven-wrapper.properties
+├── database/
+├── src/
+│   └── main/
+│       ├── java/
+│       │   ├── com/
+│       │   │   └── coursemanagement/
+│       │   │       ├── controller/
+│       │   │       │   ├── AddCourseDialogController.java
+│       │   │       │   ├── CourseStudentsDialogController.java
+│       │   │       │   ├── EditCourseDialogController.java
+│       │   │       │   ├── LoginController.java
+│       │   │       │   ├── RegisterController.java
+│       │   │       │   ├── StudentDashboardController.java
+│       │   │       │   └── TeacherDashboardController.java
+│       │   │       ├── dao/
+│       │   │       │   ├── AnnouncementDAO.java
+│       │   │       │   ├── CourseDAO.java
+│       │   │       │   ├── EnrollmentDAO.java
+│       │   │       │   ├── LessonDAO.java
+│       │   │       │   └── UserDAO.java
+│       │   │       ├── database/
+│       │   │       ├── exception/
+│       │   │       │   ├── AuthenticationException.java
+│       │   │       │   ├── BusinessLogicException.java
+│       │   │       │   ├── CourseManagementException.java
+│       │   │       │   ├── DatabaseException.java
+│       │   │       │   ├── PermissionException.java
+│       │   │       │   ├── ResourceNotFoundException.java
+│       │   │       │   └── ValidationException.java
+│       │   │       ├── model/
+│       │   │       │   ├── Announcement.java
+│       │   │       │   ├── Course.java
+│       │   │       │   ├── Enrollment.java
+│       │   │       │   ├── Lesson.java
+│       │   │       │   └── User.java
+│       │   │       ├── utils/
+│       │   │       │   ├── AlertUtils.java
+│       │   │       │   ├── PasswordUtils.java
+│       │   │       │   ├── SessionManager.java
+│       │   │       │   └── ValidationUtil.java
+│       │   │       └── CourseManagementApp.java
+│       │   └── module-info.java
+│       └── resources/
+│           ├── css/
+│           ├── fonts/
+│           ├── fxml/
+│           │   ├── AddCourseDialog.fxml
+│           │   ├── CourseStudentsDialog.fxml
+│           │   ├── EditCourseDialog.fxml
+│           │   ├── LoginView.fxml
+│           │   ├── RegisterView.fxml
+│           │   ├── StudentDashboard.fxml
+│           │   ├── TeacherDashBoard.fxml
+│           │   ├── read.txt
+│           │   └── styles.css
+│           ├── images/
+│           │   └── C4Uicon.png
+│           ├── application.properties
+│           └── database.properties
+├── target/
+├── .gitignore
+├── course-management-system.iml
+├── mvnw
+├── mvnw.cmd
+├── pom.xml
+└── source_dump.txt
+```
+
+## FILE CONTENTS

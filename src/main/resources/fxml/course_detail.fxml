@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<VBox xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.coursemanagement.controller.CourseController"
+      prefHeight="700.0" prefWidth="800.0" style="-fx-background-color: #f8f9fa;">
+    <children>
+        <!-- Header -->
+        <HBox alignment="CENTER_LEFT"
+              style="-fx-background-color: white; -fx-border-color: #e9ecef; -fx-border-width: 0 0 1 0; -fx-padding: 20 30;">
+            <children>
+                <Label text="Course Details" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #333;" />
+            </children>
+        </HBox>
+
+        <!-- Content -->
+        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;">
+            <content>
+                <VBox spacing="30.0">
+                    <padding>
+                        <Insets bottom="40.0" left="40.0" right="40.0" top="40.0" />
+                    </padding>
+                    <children>
+                        <!-- Course Image and Basic Info -->
+                        <HBox spacing="30.0">
+                            <children>
+                                <ImageView fx:id="courseImage" fitHeight="300.0" fitWidth="400.0" preserveRatio="false"
+                                           style="-fx-border-radius: 10; -fx-background-radius: 10;" />
+
+                                <VBox spacing="20.0" HBox.hgrow="ALWAYS">
+                                    <children>
+                                        <Label fx:id="titleLabel" wrapText="true"
+                                               style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #212529;" />
+
+                                        <Label fx:id="instructorLabel"
+                                               style="-fx-font-size: 16px; -fx-text-fill: #6c757d;" />
+
+                                        <HBox spacing="20.0">
+                                            <children>
+                                                <VBox spacing="5.0">
+                                                    <children>
+                                                        <Label text="Price" style="-fx-font-size: 12px; -fx-text-fill: #6c757d; -fx-font-weight: bold;" />
+                                                        <Label fx:id="priceLabel" style="-fx-font-size: 24px; -fx-text-fill: #28a745; -fx-font-weight: bold;" />
+                                                    </children>
+                                                </VBox>
+
+                                                <VBox spacing="5.0">
+                                                    <children>
+                                                        <Label text="Duration" style="-fx-font-size: 12px; -fx-text-fill: #6c757d; -fx-font-weight: bold;" />
+                                                        <Label fx:id="durationLabel" style="-fx-font-size: 16px; -fx-text-fill: #495057;" />
+                                                    </children>
+                                                </VBox>
+
+                                                <VBox spacing="5.0">
+                                                    <children>
+                                                        <Label text="Level" style="-fx-font-size: 12px; -fx-text-fill: #6c757d; -fx-font-weight: bold;" />
+                                                        <Label fx:id="levelLabel" style="-fx-font-size: 16px; -fx-text-fill: #495057;" />
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </HBox>
+
+                                        <Button onAction="#enrollCourse" prefWidth="200.0" text="Enroll Now"
+                                                style="-fx-background-color: #667eea; -fx-text-fill: white; -fx-padding: 15; -fx-border-radius: 25; -fx-background-radius: 25; -fx-font-size: 16px; -fx-font-weight: bold;" />
+                                    </children>
+                                </VBox>
+                            </children>
+                        </HBox>
+
+                        <!-- Course Description -->
+                        <VBox spacing="15.0"
+                              style="-fx-background-color: white; -fx-padding: 30; -fx-border-radius: 10; -fx-background-radius: 10; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 2);">
+                            <children>
+                                <Label text="About This Course"
+                                       style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #333;" />
+                                <Label fx:id="descriptionLabel" wrapText="true"
+                                       style="-fx-font-size: 16px; -fx-text-fill: #495057; -fx-line-spacing: 5px;" />
+                            </children>
+                        </VBox>
+
+                        <!-- What You'll Learn Section -->
+                        <VBox spacing="15.0"
+                              style="-fx-background-color: white; -fx-padding: 30; -fx-border-radius: 10; -fx-background-radius: 10; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 2);">
+                            <children>
+                                <Label text="What You'll Learn"
+                                       style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #333;" />
+                                <VBox spacing="10.0">
+                                    <children>
+                                        <Label text="✓ Master the fundamentals and advanced concepts"
+                                               style="-fx-font-size: 14px; -fx-text-fill: #495057;" />
+                                        <Label text="✓ Build real-world projects from scratch"
+                                               style="-fx-font-size: 14px; -fx-text-fill: #495057;" />
+                                        <Label text="✓ Learn industry best practices and standards"
+                                               style="-fx-font-size: 14px; -fx-text-fill: #495057;" />
+                                        <Label text="✓ Get hands-on experience with practical exercises"
+                                               style="-fx-font-size: 14px; -fx-text-fill: #495057;" />
+                                    </children>
+                                </VBox>
+                            </children>
+                        </VBox>
+                    </children>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </children>
+</VBox>

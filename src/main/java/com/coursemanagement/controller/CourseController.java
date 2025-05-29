@@ -1,0 +1,182 @@
+package com.coursemanagement.controller;
+
+import com.coursemanagement.dao.EnrollmentDAO;
+import com.coursemanagement.model.Course;
+import com.coursemanagement.util.SessionManager;
+import javafx.concurrent.Task;
+import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+
+public class CourseController {
+    @FXML private ImageView courseImage;
+    @FXML private Label titleLabel;
+    @FXML private Label instructorLabel;
+    @FXML private Label descriptionLabel;
+    @FXML private Label priceLabel;
+    @FXML private Label durationLabel;
+    @FXML private Label levelLabel;
+    @FXML private Label enrollmentCountLabel;
+    @FXML private Button enrollButton;
+    @FXML private ProgressIndicator loadingIndicator;
+
+    private Course course;
+    private final EnrollmentDAO enrollmentDAO;
+
+    public CourseController() {
+        this.enrollmentDAO = new EnrollmentDAO();
+    }
+
+    public void setCourse(Course course) {
+        this.course = course;
+        loadCourseData();
+    }
+
+    private void loadCourseData() {
+        if (course != null) {
+            titleLabel.setText(course.getTitle());
+            instructorLabel.setText("Instructor: " + course.getInstructor());
+            descriptionLabel.setText(course.getDescription());
+            priceLabel.setText("$" + String.format("%.2f", course.getPrice()));
+            durationLabel.setText(course.getDurationHours() + " hours");
+            levelLabel.setText(course.getLevel());
+
+            // Load enrollment count
+            loadEnrollmentCount();
+
+            // Load course image
+            loadCourseImage();
+
+            // Check enrollment status
+            checkEnrollmentStatus();
+        }
+    }
+
+    private void loadEnrollmentCount() {
+        Task<Integer> countTask = new Task<Integer>() {
+            @Override
+            protected Integer call() throws Exception {
+                return enrollmentDAO.getCourseEnrollmentCount(course.getId());
+            }
+        };
+
+        countTask.setOnSucceeded(e -> {
+            int count = countTask.getValue();
+            enrollmentCountLabel.setText(count + " students enrolled");
+        });
+
+        countTask.setOnFailed(e -> {
+            enrollmentCountLabel.setText("Enrollment data unavailable");
+        });
+
+        new Thread(countTask).start();
+    }
+
+    private void loadCourseImage() {
+        Task<Image> imageTask = new Task<Image>() {
+            @Override
+            protected Image call() throws Exception {
+                String imageUrl = course.getImageUrl() != null ?
+                        course.getImageUrl() : "https://via.placeholder.com/400x250";
+                return new Image(imageUrl, true);
+            }
+        };
+
+        imageTask.setOnSucceeded(e -> courseImage.setImage(imageTask.getValue()));
+        imageTask.setOnFailed(e -> {
+            Image placeholder = new Image("https://via.placeholder.com/400x250?text=Course+Image");
+            courseImage.setImage(placeholder);
+        });
+
+        new Thread(imageTask).start();
+    }
+
+    private void checkEnrollmentStatus() {
+        int currentUserId = SessionManager.getInstance().getCurrentUser().getId();
+
+        Task<Boolean> checkTask = new Task<Boolean>() {
+            @Override
+            protected Boolean call() throws Exception {
+                return enrollmentDAO.isEnrolled(currentUserId, course.getId());
+            }
+        };
+
+        checkTask.setOnSucceeded(e -> {
+            boolean isEnrolled = checkTask.getValue();
+            if (isEnrolled) {
+                enrollButton.setText("Already Enrolled");
+                enrollButton.setDisable(true);
+                enrollButton.setStyle("-fx-background-color: #28a745; -fx-text-fill: white; -fx-padding: 15; -fx-border-radius: 25; -fx-background-radius: 25; -fx-font-size: 16px; -fx-font-weight: bold;");
+            } else {
+                enrollButton.setText("Enroll Now");
+                enrollButton.setDisable(false);
+                enrollButton.setStyle("-fx-background-color: #667eea; -fx-text-fill: white; -fx-padding: 15; -fx-border-radius: 25; -fx-background-radius: 25; -fx-font-size: 16px; -fx-font-weight: bold;");
+            }
+        });
+
+        checkTask.setOnFailed(e -> {
+            enrollButton.setText("Enrollment Status Unknown");
+            enrollButton.setDisable(true);
+        });
+
+        new Thread(checkTask).start();
+    }
+
+    @FXML
+    private void enrollCourse() {
+        if (course == null) return;
+
+        enrollButton.setDisable(true);
+        showLoading(true);
+
+        int currentUserId = SessionManager.getInstance().getCurrentUser().getId();
+
+        Task<Boolean> enrollTask = new Task<Boolean>() {
+            @Override
+            protected Boolean call() throws Exception {
+                return enrollmentDAO.enroll(currentUserId, course.getId());
+            }
+        };
+
+        enrollTask.setOnSucceeded(e -> {
+            showLoading(false);
+            boolean success = enrollTask.getValue();
+
+            if (success) {
+                showAlert("Success", "Successfully enrolled in: " + course.getTitle(), Alert.AlertType.INFORMATION);
+                enrollButton.setText("Already Enrolled");
+                enrollButton.setStyle("-fx-background-color: #28a745; -fx-text-fill: white; -fx-padding: 15; -fx-border-radius: 25; -fx-background-radius: 25; -fx-font-size: 16px; -fx-font-weight: bold;");
+                loadEnrollmentCount(); // Refresh enrollment count
+            } else {
+                showAlert("Error", "Failed to enroll in the course. Please try again.", Alert.AlertType.ERROR);
+                enrollButton.setDisable(false);
+            }
+        });
+
+        enrollTask.setOnFailed(e -> {
+            showLoading(false);
+            showAlert("Error", "Enrollment failed: " + e.getSource().getException().getMessage(), Alert.AlertType.ERROR);
+            enrollButton.setDisable(false);
+        });
+
+        new Thread(enrollTask).start();
+    }
+
+    private void showLoading(boolean show) {
+        if (loadingIndicator != null) {
+            loadingIndicator.setVisible(show);
+        }
+    }
+
+    private void showAlert(String title, String message, Alert.AlertType type) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+}
