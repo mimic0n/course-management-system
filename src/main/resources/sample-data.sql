@@ -1,28 +1,27 @@
 -- Create database
-CREATE DATABASE coursemanagement;
 USE coursemanagement;
 
 -- Users table
 CREATE TABLE users (
-                       id INT PRIMARY KEY AUTO_INCREMENT,
-                       username VARCHAR(50) UNIQUE NOT NULL,
-                       email VARCHAR(100) UNIQUE NOT NULL,
-                       password VARCHAR(255) NOT NULL,
-                       full_name VARCHAR(100) NOT NULL,
-                       role ENUM('ADMIN', 'USER') DEFAULT 'USER',
-                       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                       user_id INT AUTO_INCREMENT PRIMARY KEY,
+                       username VARCHAR(50) NOT NULL UNIQUE,
+                       password VARCHAR(60) NOT NULL, -- Kích thước 60 ký tự cho BCrypt hash
+                       email VARCHAR(100) NOT NULL UNIQUE,
+                       full_name VARCHAR(100),
+                       role VARCHAR(20) DEFAULT 'student' NOT NULL, -- 'student', 'teacher', 'admin'
+                       registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Courses table
 CREATE TABLE courses (
                          id INT PRIMARY KEY AUTO_INCREMENT,
-                         title VARCHAR(200) NOT NULL,
+                         title VARCHAR(255) NOT NULL,
                          description TEXT,
                          instructor VARCHAR(100) NOT NULL,
                          price DECIMAL(10,2) DEFAULT 0.00,
-                         duration_hours INT DEFAULT 0,
+                         category VARCHAR(50) DEFAULT 'General',
                          level ENUM('BEGINNER', 'INTERMEDIATE', 'ADVANCED') DEFAULT 'BEGINNER',
-                         image_url VARCHAR(500),
+                         image_url VARCHAR(255),
                          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -40,10 +39,10 @@ CREATE TABLE enrollments (
 );
 
 -- Insert sample data
-INSERT INTO courses (title, description, instructor, price, duration_hours, level, image_url) VALUES
-                                                                                                  ('Java Programming Masterclass', 'Complete Java course from basics to advanced', 'John Smith', 99.99, 40, 'BEGINNER', 'https://via.placeholder.com/300x200'),
-                                                                                                  ('Web Development with React', 'Learn modern React development', 'Jane Doe', 89.99, 35, 'INTERMEDIATE', 'https://via.placeholder.com/300x200'),
-                                                                                                  ('Python Data Science', 'Data analysis and machine learning with Python', 'Mike Johnson', 129.99, 50, 'ADVANCED', 'https://via.placeholder.com/300x200');
+INSERT INTO courses (title, description, instructor, price, level, image_url) VALUES
+                                                                                                  ('Java Programming Masterclass', 'Complete Java course from basics to advanced', 'John Smith', 99.99, 'BEGINNER', 'src/main/resources/images/Java-Programming-Masterclass-Beginners-Experts-1024x614.webp'),
+                                                                                                  ('Web Development with React', 'Learn modern React development', 'Jane Doe', 89.99, 'INTERMEDIATE', 'src/main/resources/images/pythom-data-science.jpg'),
+                                                                                                  ('Python Data Science', 'Data analysis and machine learning with Python', 'Mike Johnson', 129.99, 'ADVANCED', 'react-web-development-0254.webp');
 
 INSERT INTO users (username, email, password, full_name, role) VALUES
                                                                    ('admin', 'admin@course.com', 'admin123', 'System Admin', 'ADMIN'),

@@ -10,6 +10,7 @@ module course.management.system {
     requires com.fasterxml.jackson.databind;
     requires bcrypt;
     requires jdk.jdi;
+    requires jbcrypt;
 
     exports com.coursemanagement;
     exports com.coursemanagement.controller;

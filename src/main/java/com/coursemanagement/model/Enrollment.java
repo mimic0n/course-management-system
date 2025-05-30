@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 public class Enrollment {
     private int id;
-    private int userId;
+    private int EuserId;
     private int courseId;
     private LocalDateTime enrollmentDate;
     private String status;
@@ -17,8 +17,8 @@ public class Enrollment {
     // Constructors
     public Enrollment() {}
 
-    public Enrollment(int userId, int courseId) {
-        this.userId = userId;
+    public Enrollment(int EuserId, int courseId) {
+        this.EuserId = EuserId;
         this.courseId = courseId;
         this.status = "ACTIVE";
         this.progress = 0;
@@ -28,8 +28,8 @@ public class Enrollment {
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
-    public int getUserId() { return userId; }
-    public void setUserId(int userId) { this.userId = userId; }
+    public int EgetUserId() { return EuserId; }
+    public void setUserId(int userId) { this.EuserId = EuserId; }
 
     public int getCourseId() { return courseId; }
     public void setCourseId(int courseId) { this.courseId = courseId; }
@@ -53,7 +53,7 @@ public class Enrollment {
     public String toString() {
         return "Enrollment{" +
                 "id=" + id +
-                ", userId=" + userId +
+                ", userId=" + EuserId +
                 ", courseId=" + courseId +
                 ", status='" + status + '\'' +
                 ", progress=" + progress +

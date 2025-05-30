@@ -159,9 +159,7 @@ public class CourseDAO {
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, course.getTitle());
             stmt.setString(2, course.getDescription());
-            stmt.setString(3, course.getInstructor());
             stmt.setDouble(4, course.getPrice());
-            stmt.setInt(5, course.getDurationHours());
             stmt.setString(6, course.getLevel());
             stmt.setString(7, course.getImageUrl());
 
@@ -186,9 +184,7 @@ public class CourseDAO {
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, course.getTitle());
             stmt.setString(2, course.getDescription());
-            stmt.setString(3, course.getInstructor());
             stmt.setDouble(4, course.getPrice());
-            stmt.setInt(5, course.getDurationHours());
             stmt.setString(6, course.getLevel());
             stmt.setString(7, course.getImageUrl());
             stmt.setInt(8, course.getId());
@@ -264,12 +260,9 @@ public class CourseDAO {
         course.setId(rs.getInt("id"));
         course.setTitle(rs.getString("title"));
         course.setDescription(rs.getString("description"));
-        course.setInstructor(rs.getString("instructor"));
         course.setPrice(rs.getDouble("price"));
-        course.setDurationHours(rs.getInt("duration_hours"));
         course.setLevel(rs.getString("level"));
         course.setImageUrl(rs.getString("image_url"));
-        course.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
         return course;
     }
 }

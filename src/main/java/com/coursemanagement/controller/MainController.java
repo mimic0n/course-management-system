@@ -72,15 +72,13 @@ public class MainController implements Initializable {
         titleLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #333;");
         titleLabel.setWrapText(true);
 
-        // Instructor
-        Label instructorLabel = new Label("by " + course.getInstructor());
-        instructorLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #666;");
+
 
         // Price and duration
-        Label priceLabel = new Label("$" + course.getPrice() + " • " + course.getDurationHours() + " hours • " + course.getLevel());
+        Label priceLabel = new Label("$" + course.getPrice() + " • " + " hours • " + course.getLevel());
         priceLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #0066cc; -fx-font-weight: bold;");
 
-        card.getChildren().addAll(imageView, titleLabel, instructorLabel, priceLabel);
+        card.getChildren().addAll(imageView, titleLabel, priceLabel);
 
         // Click handler
         card.setOnMouseClicked(e -> openCourseDetail(course));

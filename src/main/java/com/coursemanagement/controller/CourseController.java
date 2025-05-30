@@ -15,10 +15,8 @@ import javafx.scene.image.ImageView;
 public class CourseController {
     @FXML private ImageView courseImage;
     @FXML private Label titleLabel;
-    @FXML private Label instructorLabel;
     @FXML private Label descriptionLabel;
     @FXML private Label priceLabel;
-    @FXML private Label durationLabel;
     @FXML private Label levelLabel;
     @FXML private Label enrollmentCountLabel;
     @FXML private Button enrollButton;
@@ -26,6 +24,8 @@ public class CourseController {
 
     private Course course;
     private final EnrollmentDAO enrollmentDAO;
+    private boolean courseAdded = false;
+    private boolean courseUpdated = false;
 
     public CourseController() {
         this.enrollmentDAO = new EnrollmentDAO();
@@ -39,11 +39,10 @@ public class CourseController {
     private void loadCourseData() {
         if (course != null) {
             titleLabel.setText(course.getTitle());
-            instructorLabel.setText("Instructor: " + course.getInstructor());
             descriptionLabel.setText(course.getDescription());
             priceLabel.setText("$" + String.format("%.2f", course.getPrice()));
-            durationLabel.setText(course.getDurationHours() + " hours");
             levelLabel.setText(course.getLevel());
+
 
             // Load enrollment count
             loadEnrollmentCount();
@@ -96,7 +95,7 @@ public class CourseController {
     }
 
     private void checkEnrollmentStatus() {
-        int currentUserId = SessionManager.getInstance().getCurrentUser().getId();
+        int currentUserId = SessionManager.getInstance().getCurrentUser().getUserId();
 
         Task<Boolean> checkTask = new Task<Boolean>() {
             @Override
@@ -126,14 +125,14 @@ public class CourseController {
         new Thread(checkTask).start();
     }
 
-    @FXML
-    private void enrollCourse() {
+
+    @FXML private void enrollCourse() {
         if (course == null) return;
 
         enrollButton.setDisable(true);
         showLoading(true);
 
-        int currentUserId = SessionManager.getInstance().getCurrentUser().getId();
+        int currentUserId = SessionManager.getInstance().getCurrentUser().getUserId();
 
         Task<Boolean> enrollTask = new Task<Boolean>() {
             @Override
@@ -178,5 +177,27 @@ public class CourseController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+    public boolean isCourseAdded() {
+        return courseAdded;
+    }
+
+    public boolean isCourseUpdated() {
+        return courseUpdated;
+    }
+
+    // Update the enrollCourse method to set courseAdded
+
+
+    // Add a method to update course
+    public void updateCourse(Course updatedCourse) {
+        // Logic to update course
+        try {
+            // Update course logic here
+            courseUpdated = true;
+        } catch (Exception e) {
+            courseUpdated = false;
+            e.printStackTrace();
+        }
     }
 }

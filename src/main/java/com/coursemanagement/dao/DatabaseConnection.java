@@ -2,7 +2,7 @@ package com.coursemanagement.dao;
 import java.sql.*;
 
 public class DatabaseConnection {
-    private static final String URL = "jdbc:mysql://localhost:3306/course_management?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh";
+    private static final String URL = "jdbc:mysql://localhost:3306/coursemanagement?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh";
     private static final String USERNAME = "root";
     private static final String PASSWORD = "";
 
@@ -27,7 +27,7 @@ public class DatabaseConnection {
         return instance;
     }
 
-    public Connection getConnection() throws SQLException {
+    public static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(URL, USERNAME, PASSWORD);
     }
 

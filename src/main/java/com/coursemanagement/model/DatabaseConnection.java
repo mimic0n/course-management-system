@@ -23,7 +23,7 @@ public class DatabaseConnection {
 
             if (rs.next()) {
                 User user = new User();
-                user.setId(rs.getInt("id"));
+                user.setUserId(rs.getInt("id"));
                 user.setUsername(rs.getString("username"));
                 user.setEmail(rs.getString("email"));
                 user.setFullName(rs.getString("full_name"));
@@ -55,7 +55,7 @@ public class DatabaseConnection {
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, user.getEmail());
             stmt.setString(2, user.getFullName());
-            stmt.setInt(3, user.getId());
+            stmt.setInt(3, user.getUserId());
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -74,9 +74,7 @@ public class DatabaseConnection {
                 course.setId(rs.getInt("id"));
                 course.setTitle(rs.getString("title"));
                 course.setDescription(rs.getString("description"));
-                course.setInstructor(rs.getString("instructor"));
                 course.setPrice(rs.getDouble("price"));
-                course.setDurationHours(rs.getInt("duration_hours"));
                 course.setLevel(rs.getString("level"));
                 course.setImageUrl(rs.getString("image_url"));
                 courses.add(course);
@@ -97,9 +95,7 @@ public class DatabaseConnection {
                 course.setId(rs.getInt("id"));
                 course.setTitle(rs.getString("title"));
                 course.setDescription(rs.getString("description"));
-                course.setInstructor(rs.getString("instructor"));
                 course.setPrice(rs.getDouble("price"));
-                course.setDurationHours(rs.getInt("duration_hours"));
                 course.setLevel(rs.getString("level"));
                 course.setImageUrl(rs.getString("image_url"));
                 return course;

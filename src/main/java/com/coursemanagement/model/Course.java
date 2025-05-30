@@ -1,66 +1,144 @@
 package com.coursemanagement.model;
 
-import java.time.LocalDateTime;
+import javafx.beans.property.*;
 
 public class Course {
-    private int id;
-    private String title;
-    private String description;
-    private String instructor;
-    private double price;
-    private int durationHours;
-    private String level;
-    private String imageUrl;
-    private LocalDateTime createdAt;
+    private IntegerProperty id;
+    private StringProperty title;
+    private StringProperty description;
+    private DoubleProperty price;
+    private StringProperty level;
+    private StringProperty category;
+    private StringProperty imageUrl;
 
     // Constructors
+    public Course(int id, String title, String description, double price, String level, String category, String imageUrl) {
+        this.id = new SimpleIntegerProperty(id);
+        this.title = new SimpleStringProperty(title);
+        this.description = new SimpleStringProperty(description);
+        this.price = new SimpleDoubleProperty(price);
+        this.level = new SimpleStringProperty(level);
+        this.category = new SimpleStringProperty(category);
+        this.imageUrl = new SimpleStringProperty(imageUrl);
+    }
+
+    public Course(String courseName, String description, double price, String level, String category, String imageUrl) {
+        this.id = new SimpleIntegerProperty(-1);
+        this.title = new SimpleStringProperty(courseName);
+        this.description = new SimpleStringProperty(description);
+        this.price = new SimpleDoubleProperty(price);
+        this.level = new SimpleStringProperty(level);
+        this.category = new SimpleStringProperty(category);
+        this.imageUrl = new SimpleStringProperty(imageUrl);
+    }
+
     public Course() {
+        this.id = new SimpleIntegerProperty();
+        this.title = new SimpleStringProperty();
+        this.description = new SimpleStringProperty();
+        this.price = new SimpleDoubleProperty();
+        this.level = new SimpleStringProperty();
+        this.category = new SimpleStringProperty();
+        this.imageUrl = new SimpleStringProperty();
     }
 
-    public Course(String title, String description, String instructor, double price, int durationHours, String level) {
-        this.title = title;
-        this.description = description;
-        this.instructor = instructor;
-        this.price = price;
-        this.durationHours = durationHours;
-        this.level = level;
+    // Property accessors
+    public IntegerProperty idProperty() {
+        return id;
     }
-    // Getters and Setters
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
 
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
+    public StringProperty titleProperty() {
+        return title;
+    }
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public StringProperty descriptionProperty() {
+        return description;
+    }
 
-    public String getInstructor() { return instructor; }
-    public void setInstructor(String instructor) { this.instructor = instructor; }
+    public DoubleProperty priceProperty() {
+        return price;
+    }
 
-    public double getPrice() { return price; }
-    public void setPrice(double price) { this.price = price; }
+    public StringProperty levelProperty() {
+        return level;
+    }
 
-    public int getDurationHours() { return durationHours; }
-    public void setDurationHours(int durationHours) { this.durationHours = durationHours; }
+    public StringProperty categoryProperty() {
+        return category;
+    }
 
-    public String getLevel() { return level; }
-    public void setLevel(String level) { this.level = level; }
+    public StringProperty imageUrlProperty() {
+        return imageUrl;
+    }
 
-    public String getImageUrl() { return imageUrl; }
-    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+    // Getters
+    public int getId() {
+        return id.get();
+    }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public String getTitle() {
+        return title.get();
+    }
+
+    public String getDescription() {
+        return description.get();
+    }
+
+    public double getPrice() {
+        return price.get();
+    }
+
+    public String getLevel() {
+        return level.get();
+    }
+
+    public String getCategory() {
+        return category.get();
+    }
+
+    public String getImageUrl() {
+        return imageUrl.get();
+    }
+
+    // Setters
+    public void setId(int id) {
+        this.id.set(id);
+    }
+
+    public void setTitle(String title) {
+        this.title.set(title);
+    }
+
+    public void setDescription(String description) {
+        this.description.set(description);
+    }
+
+    public void setPrice(double price) {
+        this.price.set(price);
+    }
+
+    public void setLevel(String level) {
+        this.level.set(level);
+    }
+
+    public void setCategory(String category) {
+        this.category.set(category);
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl.set(imageUrl);
+    }
 
     @Override
     public String toString() {
         return "Course{" +
-                "id=" + id +
-                ", title='" + title + '\'' +
-                ", instructor='" + instructor + '\'' +
-                ", price=" + price +
+                "id=" + id.get() +
+                ", title='" + title.get() + '\'' +
+                ", description='" + description.get() + '\'' +
+                ", price=" + price.get() +
+                ", level='" + level.get() + '\'' +
+                ", category='" + category.get() + '\'' +
+                ", imageUrl='" + imageUrl.get() + '\'' +
                 '}';
     }
-
 }

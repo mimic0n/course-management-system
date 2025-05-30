@@ -1,12 +1,19 @@
 package com.coursemanagement.controller;
 
 
+import com.coursemanagement.dao.UserDAO;
 import com.coursemanagement.model.User;
 import com.coursemanagement.util.SessionManager;
 import com.coursemanagement.model.DatabaseConnection;
+import com.coursemanagement.util.PasswordHasher;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.Alert;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TabPane;
+
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
@@ -20,22 +27,24 @@ public class LoginController {
     @FXML private TextField regFullNameField;
     @FXML private TabPane tabPane;
 
+    private UserDAO userDAO = new UserDAO();
+
     @FXML
     private void handleLogin() {
-        String username = usernameField.getText().trim();
-        String password = passwordField.getText();
+        String username = usernameField.getText();
+        String plainPassword = passwordField.getText();
 
-        if (username.isEmpty() || password.isEmpty()) {
-            showAlert("Error", "Please fill in all fields");
-            return;
-        }
-
-        User user = DatabaseConnection.authenticateUser(username, password);
-        if (user != null) {
-            SessionManager.getInstance().setCurrentUser(user);
-            openMainWindow();
-        } else {
-            showAlert("Error", "Invalid username or password");
+        try {
+            User user = userDAO.authenticate(username, plainPassword);
+            if (user != null) {
+                SessionManager.getInstance().setCurrentUser(user);
+                openMainWindow();
+            } else {
+                showAlert("Error", "Invalid username or password");
+            }
+        } catch (RuntimeException e) {
+            showAlert("Error", "Login failed: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -51,10 +60,13 @@ public class LoginController {
             return;
         }
 
-        User user = new User(username, email, password, fullName);
+        // Hash the password before creating the user
+        String hashedPassword = PasswordHasher.hashPassword(password);
+        User user = new User(username, email, hashedPassword, fullName);
+
         if (DatabaseConnection.registerUser(user)) {
             showAlert("Success", "Registration successful! Please login.");
-            tabPane.getSelectionModel().select(0); // Switch to login tab
+            tabPane.getSelectionModel().select(0);
             clearRegistrationFields();
         } else {
             showAlert("Error", "Registration failed. Username or email might already exist.");

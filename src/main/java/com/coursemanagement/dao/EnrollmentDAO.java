@@ -88,12 +88,9 @@ public class EnrollmentDAO {
                 course.setId(rs.getInt("id"));
                 course.setTitle(rs.getString("title"));
                 course.setDescription(rs.getString("description"));
-                course.setInstructor(rs.getString("instructor"));
                 course.setPrice(rs.getDouble("price"));
-                course.setDurationHours(rs.getInt("duration_hours"));
                 course.setLevel(rs.getString("level"));
                 course.setImageUrl(rs.getString("image_url"));
-                course.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
                 courses.add(course);
             }
         } catch (SQLException e) {
@@ -131,7 +128,7 @@ public class EnrollmentDAO {
 
                 // Set user info
                 User user = new User();
-                user.setId(rs.getInt("user_id"));
+                user.setUserId(rs.getInt("user_id"));
                 user.setUsername(rs.getString("username"));
                 user.setFullName(rs.getString("full_name"));
                 user.setEmail(rs.getString("email"));
