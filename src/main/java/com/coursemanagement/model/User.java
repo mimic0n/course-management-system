@@ -1,11 +1,12 @@
 package com.coursemanagement.model;
 import java.time.LocalDateTime;
 import java.util.Objects;
-
 import javafx.beans.property.*;
 
+import static com.coursemanagement.util.PasswordHasher.hashPassword;
+
 public class User {
-    private IntegerProperty  id;
+    private IntegerProperty  user_id;
     private StringProperty username;
     private StringProperty email;
     private StringProperty password;
@@ -14,7 +15,7 @@ public class User {
 
     // Constructors
     public User() {
-        this.id = new SimpleIntegerProperty();
+        this.user_id = new SimpleIntegerProperty();
         this.username = new SimpleStringProperty();
         this.password = new SimpleStringProperty();
         this.email = new SimpleStringProperty();
@@ -22,16 +23,16 @@ public class User {
         this.role = new SimpleStringProperty();
     }
     public User(String username, String password, String email, String fullName, String role) {
-        this.id = new SimpleIntegerProperty(-1);
+        this.user_id = new SimpleIntegerProperty(-1);
         this.username = new SimpleStringProperty(username);
-        this.password = new SimpleStringProperty(password);
+        this.password = new SimpleStringProperty(hashPassword(password));
         this.email = new SimpleStringProperty(email);
         this.fullName = new SimpleStringProperty(fullName);
-        this.role = new SimpleStringProperty(role);
+        this.role = new SimpleStringProperty(role); // Default role
     }
 
-    public User(String username, String password, String email, String fullName, String role, IntegerProperty id, StringProperty username1, StringProperty email1, StringProperty password1, StringProperty fullName1, StringProperty role1) {
-        this.id = id;
+    public User( IntegerProperty id, StringProperty username1, StringProperty email1, StringProperty password1, StringProperty fullName1, StringProperty role1) {
+        this.user_id = id;
         this.username = username1;
         this.email = email1;
         this.password = password1;
@@ -39,7 +40,7 @@ public class User {
         this.role = role1;
     }
     public User(int id, String username, String email, String fullName, String role) {
-        this.id = new SimpleIntegerProperty(id);
+        this.user_id = new SimpleIntegerProperty(id);
         this.username = new SimpleStringProperty(username);
         this.password = new SimpleStringProperty(""); // Password is not updated through this constructor
         this.email = new SimpleStringProperty(email);
@@ -48,26 +49,36 @@ public class User {
     }
 
     public User(int id, String username, String email, String password, String fullName, String role, LocalDateTime createdAt) {
-        this.id = new SimpleIntegerProperty(id);
+        this.user_id = new SimpleIntegerProperty(id);
         this.username = new SimpleStringProperty(username);
         this.email = new SimpleStringProperty(email);
-        this.password = new SimpleStringProperty(password);
+        this.password = new SimpleStringProperty(hashPassword(password));
         this.fullName = new SimpleStringProperty(fullName);
         this.role = new SimpleStringProperty(role);
     }
 
-    public User(String username, String email, String password, String fullName) {
-        this.id = new SimpleIntegerProperty(-1); // Default ID for new users
+    public User(String username, String email, String hashedPassword, String fullName) {
+        this.user_id = new SimpleIntegerProperty(-1);
         this.username = new SimpleStringProperty(username);
         this.email = new SimpleStringProperty(email);
-        this.password = new SimpleStringProperty(password);
+        this.password = new SimpleStringProperty(hashedPassword);
         this.fullName = new SimpleStringProperty(fullName);
-        this.role = new SimpleStringProperty("USER"); // Default role
+        this.role = new SimpleStringProperty("ADMIN"); // Default role
     }
+
+    public User(int userId, String username, String password, String email, String fullName, String role) {
+        this.user_id = new SimpleIntegerProperty(userId);
+        this.username = new SimpleStringProperty(username);
+        this.password = new SimpleStringProperty(hashPassword(password));
+        this.email = new SimpleStringProperty(email);
+        this.fullName = new SimpleStringProperty(fullName);
+        this.role = new SimpleStringProperty(role);
+    }
+
 
     // Getters for properties
     public IntegerProperty userIdProperty() {
-        return id;
+        return user_id;
     }
 
     public StringProperty usernameProperty() {
@@ -92,7 +103,7 @@ public class User {
 
     // Getters for values
     public int getUserId() {
-        return id.get();
+        return user_id.get();
     }
 
     public String getUsername() {
@@ -117,7 +128,7 @@ public class User {
 
     // Setters
     public void setUserId(int userId) {
-        this.id.set(userId);
+        this.user_id.set(userId);
     }
 
     public void setUsername(String username) {
@@ -145,11 +156,11 @@ public class User {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
         User user = (User) obj;
-        return id == user.id;
+        return Objects.equals(user_id.get(), user.user_id.get());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id.get());
+        return Objects.hash(user_id.get());
     }
 }

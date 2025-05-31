@@ -4,8 +4,8 @@ import com.coursemanagement.model.User;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import org.mindrot.jbcrypt.BCrypt;
 import com.coursemanagement.util.PasswordHasher;
+
 
 public class UserDAO {
     private final DatabaseConnection dbConnection;
@@ -16,34 +16,47 @@ public class UserDAO {
 
     // Authenticate user for login
     public User authenticate(String username, String password) {
-        String query = "SELECT user_id, username, password FROM users WHERE username = ?";
+        String query = "SELECT user_id, username, email, full_name, password, role FROM users WHERE username = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
             stmt.setString(1, username);
-            ResultSet rs = stmt.executeQuery();
+            System.out.println("Attempting to authenticate user: " + username); // Debug line
 
-            if (rs.next()) {
-                String storedHash = rs.getString("password");
-                System.out.println("Stored hash for user " + username + ": " + storedHash); // Debug line
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    String storedHash = rs.getString("password");
+                    String storedRole = rs.getString("role");
+                    System.out.println("Found user. Stored hash: " + storedHash); // Debug line
+                    System.out.println("User role: " + storedRole); // Debug line
 
-                if (storedHash != null && storedHash.startsWith("$2")) {
-                    if (PasswordHasher.checkPassword(password , storedHash)) {
-                        User user = new User();
-                        user.setUserId(rs.getInt("user_id"));
-                        user.setUsername(rs.getString("username"));
-                        // Set other user properties
-                        return user;
+                    if (storedHash != null) {
+                        boolean passwordMatch = PasswordHasher.checkPassword(password, storedHash);
+                        System.out.println("Password match result: " + passwordMatch); // Debug line
+
+                        if (passwordMatch) {
+                            User user = new User();
+                            user.setUserId(rs.getInt("user_id"));
+                            user.setUsername(rs.getString("username"));
+                            user.setEmail(rs.getString("email"));
+                            user.setFullName(rs.getString("full_name"));
+                            user.setPassword(storedHash);
+                            user.setRole(storedRole);
+                            return user;
+                        }
                     }
                 } else {
-                    System.err.println("Invalid hash format for user: " + username); // Debug line
+                    System.out.println("No user found with username: " + username); // Debug line
                 }
             }
-            return null;
         } catch (SQLException e) {
+            System.err.println("Database error during authentication: " + e.getMessage());
+            e.printStackTrace();
             throw new RuntimeException("Database error during authentication", e);
         }
+        return null;
+
     }
 
     // Create new user
@@ -53,8 +66,8 @@ public class UserDAO {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             // Băm mật khẩu trước khi lưu
-            String hashedPassword = PasswordHasher.hashPassword(user.getPassword());
-            user.setPassword(hashedPassword); // Cập nhật mật khẩu đã băm vào đối tượng User
+//            String hashedPassword = PasswordHasher.hashPassword(user.getPassword());
+//            user.setPassword(hashedPassword); // Cập nhật mật khẩu đã băm vào đối tượng User
 
             stmt.setString(1, user.getUsername());
             stmt.setString(2, user.getPassword()); // Lưu mật khẩu đã băm
@@ -65,6 +78,7 @@ public class UserDAO {
             int rowsAffected = stmt.executeUpdate();
             return rowsAffected > 0;
         } catch (SQLException e) {
+            System.err.println("Error creating user: " + e.getMessage());
             e.printStackTrace();
             // Xử lý exception tốt hơn, có thể ném lại một custom exception
             return false;
@@ -73,182 +87,146 @@ public class UserDAO {
 
     // Get user by ID
     public User findById(int id) {
-        String sql = "SELECT * FROM users WHERE id = ?";
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-
-        try {
-            conn = dbConnection.getConnection();
-            stmt = conn.prepareStatement(sql);
+        String sql = "SELECT user_id, username, email, full_name, password, role FROM users WHERE user_id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, id);
-            rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                return mapResultSetToUser(rs);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapResultSetToUser(rs);
+                }
             }
         } catch (SQLException e) {
-            System.err.println("Error finding user by ID: " + e.getMessage());
-        } finally {
-            dbConnection.closeResultSet(rs);
-            dbConnection.closeStatement(stmt);
-            dbConnection.closeConnection(conn);
+            System.err.println("Error finding user by ID " + id + ": " + e.getMessage());
+            e.printStackTrace();
         }
         return null;
     }
 
     // Get user by username
     public User findByUsername(String username) {
-        String query = "SELECT user_id, username, email, full_name, password, role FROM users WHERE username = ?";
-
-        Connection connection = null;
-        PreparedStatement statement = null;
-        ResultSet rs = null;
-
-        try {
-            connection = DatabaseConnection.getConnection();
-            statement = connection.prepareStatement(query);
-            statement.setString(1, username);
-            rs = statement.executeQuery();
-
-            if (rs.next()) {
-                User user = new User();
-                user.setUserId(rs.getInt("user_id"));
-                user.setUsername(rs.getString("username"));
-                user.setEmail(rs.getString("email"));
-                user.setFullName(rs.getString("full_name"));
-                user.setPassword(rs.getString("password"));
-                user.setRole(rs.getString("role"));
-                return user;
+        String sql = "SELECT user_id, username, email, full_name, password, role FROM users WHERE username = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, username);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapResultSetToUser(rs);
+                }
             }
-            return null;
-
         } catch (SQLException e) {
-            throw new RuntimeException("Error finding user by username: " + e.getMessage(), e);
-        } finally {
-            DatabaseConnection.getInstance().closeResultSet(rs);
-            DatabaseConnection.getInstance().closeStatement(statement);
-            DatabaseConnection.getInstance().closeConnection(connection);
+            System.err.println("Error finding user by username " + username + ": " + e.getMessage());
+            e.printStackTrace();
         }
+        return null;
+    }
+    public User findByEmail(String email) {
+        String sql = "SELECT user_id, username, email, full_name, password, role FROM users WHERE email = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, email);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapResultSetToUser(rs);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error finding user by email " + email + ": " + e.getMessage());
+            e.printStackTrace();
+        }
+        return null;
     }
 
     // Check if email exists
     public boolean emailExists(String email) {
         String sql = "SELECT COUNT(*) FROM users WHERE email = ?";
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-
-        try {
-            conn = dbConnection.getConnection();
-            stmt = conn.prepareStatement(sql);
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, email);
-            rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                return rs.getInt(1) > 0;
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
             }
         } catch (SQLException e) {
-            System.err.println("Error checking email existence: " + e.getMessage());
-        } finally {
-            dbConnection.closeResultSet(rs);
-            dbConnection.closeStatement(stmt);
-            dbConnection.closeConnection(conn);
+            System.err.println("Error checking email existence for " + email + ": " + e.getMessage());
+            e.printStackTrace();
         }
-        return false;
+        return false; // Mặc định là false nếu có lỗi hoặc không tìm thấy
+
     }
 
     // Update user
     public boolean update(User user) {
+        boolean updatePassword = user.getPassword() != null && !user.getPassword().isEmpty() && !user.getPassword().startsWith("$2a$"); // Heuristic to check if it's a new plain password
+
         String sql;
-        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
-            sql = "UPDATE Users SET username = ?, password = ?, email = ?, full_name = ?, role = ? WHERE user_id = ?";
+        if (updatePassword) {
+            sql = "UPDATE users SET username = ?, email = ?, password = ?, full_name = ?, role = ? WHERE user_id = ?";
         } else {
-            sql = "UPDATE Users SET username = ?, email = ?, full_name = ?, role = ? WHERE user_id = ?";
+            sql = "UPDATE users SET username = ?, email = ?, full_name = ?, role = ? WHERE user_id = ?";
         }
 
-        Connection conn = null;
-        PreparedStatement stmt = null;
-
-        try {
-            conn = dbConnection.getConnection();
-            stmt = conn.prepareStatement(sql);
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             int paramIndex = 1;
             stmt.setString(paramIndex++, user.getUsername());
+            stmt.setString(paramIndex++, user.getEmail());
 
-            if (user.getPassword() != null && !user.getPassword().isEmpty()) {
-                String hashedPassword = PasswordHasher.hashPassword(user.getPassword());
-                stmt.setString(paramIndex++, hashedPassword);
+            if (updatePassword) {
+                stmt.setString(paramIndex++, PasswordHasher.hashPassword(user.getPassword()));
             }
 
-            stmt.setString(paramIndex++, user.getEmail());
             stmt.setString(paramIndex++, user.getFullName());
             stmt.setString(paramIndex++, user.getRole());
             stmt.setInt(paramIndex, user.getUserId());
 
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.err.println("Error updating user: " + e.getMessage());
-        } finally {
-            dbConnection.closeStatement(stmt);
-            dbConnection.closeConnection(conn);
+            System.err.println("Error updating user " + user.getUsername() + ": " + e.getMessage());
+            e.printStackTrace();
+            return false;
         }
-        return false;
     }
 
 
     // Get all users (for admin)
     public List<User> findAll() {
         List<User> users = new ArrayList<>();
-        String sql = "SELECT * FROM users ORDER BY created_at DESC";
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-
-        try {
-            conn = dbConnection.getConnection();
-            stmt = conn.createStatement();
-            rs = stmt.executeQuery(sql);
+        String sql = "SELECT user_id, username, email, full_name, password, role FROM users ORDER BY username ASC"; // Hoặc ORDER BY user_id
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql); // Sử dụng PreparedStatement nếu không có tham số cũng không sao
+             ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
                 users.add(mapResultSetToUser(rs));
             }
         } catch (SQLException e) {
-            System.err.println("Error getting all users: " + e.getMessage());
-        } finally {
-            dbConnection.closeResultSet(rs);
-            dbConnection.closeStatement(stmt);
-            dbConnection.closeConnection(conn);
+            System.err.println("Error finding all users: " + e.getMessage());
+            e.printStackTrace();
         }
         return users;
     }
 
     // Delete user
     public boolean delete(int userId) {
-        String sql = "DELETE FROM users WHERE id = ?";
-        Connection conn = null;
-        PreparedStatement stmt = null;
-
-        try {
-            conn = dbConnection.getConnection();
-            stmt = conn.prepareStatement(sql);
+        String sql = "DELETE FROM users WHERE user_id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, userId);
-
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.err.println("Error deleting user: " + e.getMessage());
-        } finally {
-            dbConnection.closeStatement(stmt);
-            dbConnection.closeConnection(conn);
+            System.err.println("Error deleting user ID " + userId + ": " + e.getMessage());
+            e.printStackTrace();
+            return false;
         }
-        return false;
     }
 
     // Helper method to map ResultSet to User object
     private User mapResultSetToUser(ResultSet rs) throws SQLException {
         User user = new User();
-        user.setUserId(rs.getInt("id"));
+        user.setUserId(rs.getInt("user_id"));
         user.setUsername(rs.getString("username"));
         user.setEmail(rs.getString("email"));
         user.setPassword(rs.getString("password"));
@@ -256,5 +234,74 @@ public class UserDAO {
         user.setRole(rs.getString("role"));
         return user;
     }
+    public boolean createAdminAccount(String username, String password, String email, String fullName) {
+        String sql = "INSERT INTO Users (username, password, email, full_name, role) VALUES (?, ?, ?, ?, 'ADMIN')";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            // Hash the password before storing
+            String hashedPassword = PasswordHasher.hashPassword(password);
+            System.out.println("Creating admin account with hash: " + hashedPassword); // Debug line
+
+            stmt.setString(1, username);
+            stmt.setString(2, hashedPassword);
+            stmt.setString(3, email);
+            stmt.setString(4, fullName);
+
+            int rowsAffected = stmt.executeUpdate();
+
+            if (rowsAffected > 0) {
+                System.out.println("Admin account created successfully");
+                return true;
+            }
+            return false;
+
+        } catch (SQLException e) {
+            System.err.println("Error creating admin account: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+
+    }
+    public boolean save(User user) {
+        String sql = "INSERT INTO users (username, password, email, full_name, role) VALUES (?, ?, ?, ?, ?)";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, user.getUsername());
+            stmt.setString(2, user.getPassword());  // Password should already be hashed
+            stmt.setString(3, user.getEmail());
+            stmt.setString(4, user.getFullName());
+            stmt.setString(5, user.getRole());
+
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+
+        } catch (SQLException e) {
+            System.err.println("Error saving user: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean deleteByUsername(String username) {
+        String sql = "DELETE FROM users WHERE username = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, username);
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+
+        } catch (SQLException e) {
+            System.err.println("Error deleting user: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 
 }

@@ -6,7 +6,6 @@
     <file url="file://$PROJECT_DIR$/database/migration/migration_script.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/database/schema.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/src/main/java/com/coursemanagement/dao/CourseDAO.java" dialect="GenericSQL" />
-    <file url="file://$PROJECT_DIR$/src/main/java/com/coursemanagement/dao/EnrollmentDAO.java" dialect="GenericSQL" />
     <file url="file://$PROJECT_DIR$/src/main/java/com/coursemanagement/dao/UserDAO.java" dialect="GenericSQL" />
     <file url="file://$PROJECT_DIR$/src/main/java/com/coursemanagement/model/DatabaseConnection.java" dialect="GenericSQL" />
     <file url="file://$PROJECT_DIR$/src/main/resources/sample-data.sql" dialect="GenericSQL" />

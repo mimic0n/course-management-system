@@ -7,7 +7,7 @@
 
 <VBox xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.coursemanagement.controller.LoginController"
       prefHeight="600.0" prefWidth="400.0"
-      style="-fx-background-color: linear-gradient(to bottom, #667eea 0%, #764ba2 100%);">
+      style="-fx-background-color: linear-gradient(to bottom, #05091a 0%, #e3dbec 100%);">
     <children>
         <VBox alignment="CENTER" spacing="30.0" VBox.vgrow="ALWAYS">
             <children>
@@ -27,11 +27,11 @@
                 </VBox>
 
                 <TabPane fx:id="tabPane" prefHeight="300.0" prefWidth="350.0"
-                         style="-fx-background-color: white; -fx-border-radius: 10; -fx-background-radius: 10;">
-                    <tabs>
-                        <Tab text="Login" closable="false">
+                         style="-fx-background-color: #020000; -fx-border-radius: 10; -fx-background-radius: 10;">
+                    <tabs  >
+                        <Tab text="Login" closable="false" >
                             <content>
-                                <VBox alignment="CENTER" spacing="20.0" style="-fx-background-color: white; -fx-background-radius: 10;">
+                                <VBox alignment="CENTER" spacing="20.0" style="-fx-background-color: #f8f8f8; -fx-background-radius: 10;">
                                     <padding>
                                         <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
                                     </padding>
@@ -46,6 +46,7 @@
                                         </VBox>
                                         <Button onAction="#handleLogin" prefWidth="200.0" text="Login"
                                                 style="-fx-background-color: #667eea; -fx-text-fill: white; -fx-padding: 12; -fx-border-radius: 25; -fx-background-radius: 25; -fx-font-size: 14px; -fx-font-weight: bold;" />
+                                        <Hyperlink text="Quên mật khẩu?" onAction="#handleForgotPassword"/>
                                     </children>
                                 </VBox>
                             </content>
@@ -77,6 +78,7 @@
                             </content>
                         </Tab>
                     </tabs>
+
                 </TabPane>
             </children>
             <padding>

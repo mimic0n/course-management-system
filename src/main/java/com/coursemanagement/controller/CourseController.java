@@ -1,5 +1,6 @@
 package com.coursemanagement.controller;
 
+
 import com.coursemanagement.dao.EnrollmentDAO;
 import com.coursemanagement.model.Course;
 import com.coursemanagement.util.SessionManager;
@@ -11,6 +12,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+
+import java.sql.Connection;
 
 public class CourseController {
     @FXML private ImageView courseImage;
@@ -26,6 +29,7 @@ public class CourseController {
     private final EnrollmentDAO enrollmentDAO;
     private boolean courseAdded = false;
     private boolean courseUpdated = false;
+    private Object DatabaseConnection;
 
     public CourseController() {
         this.enrollmentDAO = new EnrollmentDAO();
@@ -54,6 +58,7 @@ public class CourseController {
             checkEnrollmentStatus();
         }
     }
+
 
     private void loadEnrollmentCount() {
         Task<Integer> countTask = new Task<Integer>() {
@@ -200,4 +205,9 @@ public class CourseController {
             e.printStackTrace();
         }
     }
+
+
+
+
+
 }

@@ -1,23 +1,28 @@
-// Ví dụ trong một lớp tiện ích (ví dụ: com.coursemanagement.util.PasswordHasher.java)
-// Hoặc bạn có thể thêm trực tiếp vào UserDAO nếu muốn đơn giản
 package com.coursemanagement.util;
 
 import org.mindrot.jbcrypt.BCrypt;
 
 public class PasswordHasher {
+    // Number of salt rounds for BCrypt
+    private static final int SALT_ROUNDS = 12;
+
+    // Hash a password using BCrypt
     public static String hashPassword(String plainTextPassword) {
-        return BCrypt.hashpw(plainTextPassword, BCrypt.gensalt(12));
+        if (plainTextPassword == null || plainTextPassword.isEmpty()) {
+            throw new IllegalArgumentException("Password cannot be null or empty");
+        }
+        return BCrypt.hashpw(plainTextPassword, BCrypt.gensalt(SALT_ROUNDS));
     }
 
-    public static boolean checkPassword(String plainTextPassword, String hashedPassword) {
-        if (plainTextPassword == null || hashedPassword == null) {
+    // Verify a password against a stored hash
+    public static boolean checkPassword(String plainTextPassword, String storedHash) {
+        if (plainTextPassword == null || storedHash == null) {
             return false;
         }
-
         try {
-            return BCrypt.checkpw(plainTextPassword, hashedPassword);
+            return BCrypt.checkpw(plainTextPassword, storedHash);
         } catch (IllegalArgumentException e) {
-            System.err.println("Invalid password hash format: " + e.getMessage());
+            System.err.println("Error checking password: " + e.getMessage());
             return false;
         }
     }

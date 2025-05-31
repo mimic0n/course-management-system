@@ -44,6 +44,7 @@
                                         <TableColumn fx:id="courseNameColumn" prefWidth="200.0" text="Tên Khóa học" />
                                         <TableColumn fx:id="courseDescriptionColumn" prefWidth="300.0" text="Mô tả" />
                                         <TableColumn fx:id="coursePriceColumn" prefWidth="100.0" text="Giá" />
+                                        <TableColumn fx:id="courseLevelColumn" prefWidth="120.0" text="Level" />
                                         <TableColumn fx:id="courseCategoryColumn" prefWidth="120.0" text="Danh mục" />
                                         <TableColumn fx:id="courseImageUrlColumn" prefWidth="150.0" text="Ảnh URL" />
                                     </columns>

@@ -3,7 +3,7 @@ package com.coursemanagement.model;
 import javafx.beans.property.*;
 
 public class Course {
-    private IntegerProperty id;
+    private IntegerProperty CourseID;
     private StringProperty title;
     private StringProperty description;
     private DoubleProperty price;
@@ -12,8 +12,8 @@ public class Course {
     private StringProperty imageUrl;
 
     // Constructors
-    public Course(int id, String title, String description, double price, String level, String category, String imageUrl) {
-        this.id = new SimpleIntegerProperty(id);
+    public Course(int CourseID, String title, String description, double price, String level, String category, String imageUrl) {
+        this.CourseID = new SimpleIntegerProperty(CourseID);
         this.title = new SimpleStringProperty(title);
         this.description = new SimpleStringProperty(description);
         this.price = new SimpleDoubleProperty(price);
@@ -23,7 +23,7 @@ public class Course {
     }
 
     public Course(String courseName, String description, double price, String level, String category, String imageUrl) {
-        this.id = new SimpleIntegerProperty(-1);
+        this.CourseID = new SimpleIntegerProperty(-1);
         this.title = new SimpleStringProperty(courseName);
         this.description = new SimpleStringProperty(description);
         this.price = new SimpleDoubleProperty(price);
@@ -33,7 +33,7 @@ public class Course {
     }
 
     public Course() {
-        this.id = new SimpleIntegerProperty();
+        this.CourseID = new SimpleIntegerProperty();
         this.title = new SimpleStringProperty();
         this.description = new SimpleStringProperty();
         this.price = new SimpleDoubleProperty();
@@ -44,7 +44,7 @@ public class Course {
 
     // Property accessors
     public IntegerProperty idProperty() {
-        return id;
+        return CourseID;
     }
 
     public StringProperty titleProperty() {
@@ -73,7 +73,7 @@ public class Course {
 
     // Getters
     public int getId() {
-        return id.get();
+        return CourseID.get();
     }
 
     public String getTitle() {
@@ -102,7 +102,7 @@ public class Course {
 
     // Setters
     public void setId(int id) {
-        this.id.set(id);
+        this.CourseID.set(id);
     }
 
     public void setTitle(String title) {
@@ -132,7 +132,7 @@ public class Course {
     @Override
     public String toString() {
         return "Course{" +
-                "id=" + id.get() +
+                "id=" + CourseID.get() +
                 ", title='" + title.get() + '\'' +
                 ", description='" + description.get() + '\'' +
                 ", price=" + price.get() +
