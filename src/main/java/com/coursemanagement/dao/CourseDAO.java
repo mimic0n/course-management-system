@@ -12,143 +12,7 @@ public class CourseDAO {
         this.dbConnection = DatabaseConnection.getInstance();
     }
 
-    // Get all courses
-    public List<Course> findAll() {
-        List<Course> courses = new ArrayList<>();
-        String sql = "SELECT * FROM courses ORDER BY created_at DESC";
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-
-        try {
-            conn = dbConnection.getConnection();
-            stmt = conn.createStatement();
-            rs = stmt.executeQuery(sql);
-
-            while (rs.next()) {
-                courses.add(mapResultSetToCourse(rs));
-            }
-        } catch (SQLException e) {
-            System.err.println("Error getting all courses: " + e.getMessage());
-        } finally {
-            dbConnection.closeResultSet(rs);
-            dbConnection.closeStatement(stmt);
-            dbConnection.closeConnection(conn);
-        }
-        return courses;
-    }
-
-    // Get course by ID
-    public Course findById(int id) {
-        String sql = "SELECT * FROM courses WHERE id = ?";
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-
-        try {
-            conn = dbConnection.getConnection();
-            stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, id);
-            rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                return mapResultSetToCourse(rs);
-            }
-        } catch (SQLException e) {
-            System.err.println("Error finding course by ID: " + e.getMessage());
-        } finally {
-            dbConnection.closeResultSet(rs);
-            dbConnection.closeStatement(stmt);
-            dbConnection.closeConnection(conn);
-        }
-        return null;
-    }
-
-    // Search courses by title or instructor
-    public List<Course> search(String keyword) {
-        List<Course> courses = new ArrayList<>();
-        String sql = "SELECT * FROM courses WHERE title LIKE ? OR instructor LIKE ? ORDER BY created_at DESC";
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-
-        try {
-            conn = dbConnection.getConnection();
-            stmt = conn.prepareStatement(sql);
-            String searchPattern = "%" + keyword + "%";
-            stmt.setString(1, searchPattern);
-            stmt.setString(2, searchPattern);
-            rs = stmt.executeQuery();
-
-            while (rs.next()) {
-                courses.add(mapResultSetToCourse(rs));
-            }
-        } catch (SQLException e) {
-            System.err.println("Error searching courses: " + e.getMessage());
-        } finally {
-            dbConnection.closeResultSet(rs);
-            dbConnection.closeStatement(stmt);
-            dbConnection.closeConnection(conn);
-        }
-        return courses;
-    }
-
-    // Filter courses by level
-    public List<Course> findByLevel(String level) {
-        List<Course> courses = new ArrayList<>();
-        String sql = "SELECT * FROM courses WHERE level = ? ORDER BY created_at DESC";
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-
-        try {
-            conn = dbConnection.getConnection();
-            stmt = conn.prepareStatement(sql);
-            stmt.setString(1, level);
-            rs = stmt.executeQuery();
-
-            while (rs.next()) {
-                courses.add(mapResultSetToCourse(rs));
-            }
-        } catch (SQLException e) {
-            System.err.println("Error finding courses by level: " + e.getMessage());
-        } finally {
-            dbConnection.closeResultSet(rs);
-            dbConnection.closeStatement(stmt);
-            dbConnection.closeConnection(conn);
-        }
-        return courses;
-    }
-
-    // Filter courses by price range
-    public List<Course> findByPriceRange(double minPrice, double maxPrice) {
-        List<Course> courses = new ArrayList<>();
-        String sql = "SELECT * FROM courses WHERE price BETWEEN ? AND ? ORDER BY price ASC";
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-
-        try {
-            conn = dbConnection.getConnection();
-            stmt = conn.prepareStatement(sql);
-            stmt.setDouble(1, minPrice);
-            stmt.setDouble(2, maxPrice);
-            rs = stmt.executeQuery();
-
-            while (rs.next()) {
-                courses.add(mapResultSetToCourse(rs));
-            }
-        } catch (SQLException e) {
-            System.err.println("Error finding courses by price range: " + e.getMessage());
-        } finally {
-            dbConnection.closeResultSet(rs);
-            dbConnection.closeStatement(stmt);
-            dbConnection.closeConnection(conn);
-        }
-        return courses;
-    }
-
-    // Create new course (for admin)
+    //(for admin)
     public boolean create(Course course) {
         String sql = "INSERT INTO courses (title, description, instructor, price, duration_hours, level, image_url) VALUES (?, ?, ?, ?, ?, ?, ?)";
         Connection conn = null;
@@ -220,32 +84,24 @@ public class CourseDAO {
         return false;
     }
 
-    // Get popular courses (most enrolled)
-    public List<Course> findPopularCourses(int limit) {
+    // Get all courses
+    public List<Course> findAll() {
         List<Course> courses = new ArrayList<>();
-        String sql = """
-            SELECT c.*, COUNT(e.id) as enrollment_count 
-            FROM courses c 
-            LEFT JOIN enrollments e ON c.id = e.course_id 
-            GROUP BY c.id 
-            ORDER BY enrollment_count DESC 
-            LIMIT ?
-            """;
+        String sql = "SELECT * FROM courses ORDER BY created_at DESC";
         Connection conn = null;
-        PreparedStatement stmt = null;
+        Statement stmt = null;
         ResultSet rs = null;
 
         try {
             conn = dbConnection.getConnection();
-            stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, limit);
-            rs = stmt.executeQuery();
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery(sql);
 
             while (rs.next()) {
                 courses.add(mapResultSetToCourse(rs));
             }
         } catch (SQLException e) {
-            System.err.println("Error finding popular courses: " + e.getMessage());
+            System.err.println("Error getting all courses: " + e.getMessage());
         } finally {
             dbConnection.closeResultSet(rs);
             dbConnection.closeStatement(stmt);
@@ -253,6 +109,66 @@ public class CourseDAO {
         }
         return courses;
     }
+
+    // Get course by ID
+    public Course findById(int id) {
+        String sql = "SELECT * FROM courses WHERE id = ?";
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = dbConnection.getConnection();
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, id);
+            rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return mapResultSetToCourse(rs);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error finding course by ID: " + e.getMessage());
+        } finally {
+            dbConnection.closeResultSet(rs);
+            dbConnection.closeStatement(stmt);
+            dbConnection.closeConnection(conn);
+        }
+        return null;
+    }
+
+
+
+    // Find courses by level
+    public List<Course> findByLevel(String level) {
+        List<Course> courses = new ArrayList<>();
+        String sql = "SELECT * FROM courses WHERE level = ? ORDER BY created_at DESC";
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = dbConnection.getConnection();
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, level);
+            rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                courses.add(mapResultSetToCourse(rs));
+            }
+        } catch (SQLException e) {
+            System.err.println("Error finding courses by level: " + e.getMessage());
+        } finally {
+            dbConnection.closeResultSet(rs);
+            dbConnection.closeStatement(stmt);
+            dbConnection.closeConnection(conn);
+        }
+        return courses;
+    }
+
+
+
+
+
 
     // Helper method to map ResultSet to Course object
     private Course mapResultSetToCourse(ResultSet rs) throws SQLException {

@@ -63,7 +63,7 @@ public class User {
         this.email = new SimpleStringProperty(email);
         this.password = new SimpleStringProperty(hashedPassword);
         this.fullName = new SimpleStringProperty(fullName);
-        this.role = new SimpleStringProperty("ADMIN"); // Default role
+        this.role = new SimpleStringProperty("USER"); // Default role
     }
 
     public User(int userId, String username, String password, String email, String fullName, String role) {

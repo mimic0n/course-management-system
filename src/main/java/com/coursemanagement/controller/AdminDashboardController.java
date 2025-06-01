@@ -5,9 +5,10 @@ import com.coursemanagement.dao.CourseDAO;
 import com.coursemanagement.dao.UserDAO;
 import com.coursemanagement.model.Course;
 import com.coursemanagement.model.User;
+import com.coursemanagement.util.DatabaseMaintenance;
+import com.coursemanagement.util.SessionManager;
 import javafx.fxml.FXML;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
@@ -18,12 +19,12 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.util.List;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
+
 import java.util.Optional;
 
 public class AdminDashboardController {
-
+    @FXML
+    private Label welcomeLabel;
     @FXML
     private TableView<Course> courseTable;
     @FXML
@@ -58,6 +59,7 @@ public class AdminDashboardController {
 
     private CourseDAO courseDAO = new CourseDAO();
     private UserDAO userDAO = new UserDAO();
+    private DatabaseMaintenance databaseMaintenance = new DatabaseMaintenance();
 
     public void initData(User currentUser) {
         if (currentUser != null && "ADMIN".equals(currentUser.getRole())) {
@@ -142,6 +144,7 @@ public class AdminDashboardController {
             dialogStage.initModality(Modality.WINDOW_MODAL);
             // dialogStage.initOwner(((Node)event.getSource()).getScene().getWindow()); // Đặt cửa sổ cha
             dialogStage.setScene(new Scene(root));
+            dialogStage.setResizable(true);
             dialogStage.showAndWait();
 
             if (controller.isCourseAdded()) {
@@ -167,6 +170,7 @@ public class AdminDashboardController {
                 dialogStage.setTitle("Chỉnh sửa khóa học");
                 dialogStage.initModality(Modality.WINDOW_MODAL);
                 dialogStage.setScene(new Scene(root));
+                dialogStage.setResizable(true);
                 dialogStage.showAndWait();
 
                 if (controller.isCourseUpdated()) {
@@ -214,6 +218,7 @@ public class AdminDashboardController {
             dialogStage.setTitle("Thêm người dùng mới");
             dialogStage.initModality(Modality.WINDOW_MODAL);
             dialogStage.setScene(new Scene(root));
+            dialogStage.setResizable(true);
             dialogStage.showAndWait();
 
             if (controller.isUserAdded()) {
@@ -282,6 +287,75 @@ public class AdminDashboardController {
         alert.setHeaderText(null);
         alert.setContentText(content);
         alert.showAndWait();
+    }
+
+    @FXML
+    private void logout() {
+        SessionManager.getInstance().logout();
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/login.fxml"));
+            Scene scene = new Scene(loader.load());
+            Stage stage = (Stage) welcomeLabel.getScene().getWindow();
+            stage.setScene(scene);
+            stage.setMaximized(false);
+            stage.centerOnScreen();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void switchToMain() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/mainForAD.fxml"));
+            Scene scene = new Scene(loader.load());
+            MainController controller = loader.getController();
+            controller.initData(SessionManager.getInstance().getCurrentUser());
+
+            Stage stage = (Stage) courseTable.getScene().getWindow();
+            stage.setScene(scene);
+            stage.setMaximized(false);
+            stage.isResizable();
+            stage.centerOnScreen();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Error", "Could not load main dashboard");
+        }
+    }
+
+    @FXML
+    private void handleDatabaseMaintenance() {
+        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmation.setTitle("Database Maintenance");
+        confirmation.setHeaderText("Database Reindexing");
+        confirmation.setContentText("This will update all IDs in the database. Continue?");
+
+        if (confirmation.showAndWait().get() == ButtonType.OK) {
+            try {
+                // First verify integrity
+                DatabaseMaintenance.verifyDatabaseIntegrity();
+
+                // Perform reindexing
+                DatabaseMaintenance.reindexDatabase();
+
+                // Verify again after reindexing
+                DatabaseMaintenance.verifyDatabaseIntegrity();
+
+                showAlert(Alert.AlertType.INFORMATION,
+                        "Success",
+                        "Database maintenance completed successfully");
+
+                // Refresh the tables
+                loadCourses();
+                loadUsers();
+
+            } catch (Exception e) {
+                showAlert(Alert.AlertType.ERROR,
+                        "Error",
+                        "Database maintenance failed: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
     }
 
 

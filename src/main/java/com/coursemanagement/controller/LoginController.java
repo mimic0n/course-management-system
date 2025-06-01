@@ -5,7 +5,7 @@ import com.coursemanagement.dao.UserDAO;
 import com.coursemanagement.model.User;
 import com.coursemanagement.util.SessionManager;
 import com.coursemanagement.util.PasswordHasher;
-import com.coursemanagement.dao.CourseDAO;
+
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;

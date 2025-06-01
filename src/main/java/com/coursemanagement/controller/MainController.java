@@ -1,6 +1,7 @@
 package com.coursemanagement.controller;
 
 
+import com.coursemanagement.dao.CourseDAO;
 import com.coursemanagement.model.Course;
 import com.coursemanagement.model.DatabaseConnection;
 import com.coursemanagement.model.User;
@@ -26,9 +27,8 @@ public class MainController implements Initializable {
     @FXML
     private Label welcomeLabel;
     @FXML
-    private ScrollPane coursesScrollPane;
-    @FXML
     private GridPane coursesGrid;
+
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -64,12 +64,21 @@ public class MainController implements Initializable {
         imageView.setFitWidth(250);
         imageView.setFitHeight(140);
         imageView.setPreserveRatio(false);
+
         try {
-            Image image = new Image(course.getImageUrl() != null ? course.getImageUrl() : "https://via.placeholder.com/250x140");
+            String imagePath = course.getImageUrl() != null ?
+                    "/images/" + course.getImageUrl() :
+                    "/images/C4Uicon.png";
+
+            Image image = new Image(getClass().getResourceAsStream(imagePath));
+            if (image.isError()) {
+                throw new Exception("Image not found");
+            }
             imageView.setImage(image);
         } catch (Exception e) {
-            Image placeholder = new Image("https://via.placeholder.com/250x140");
-            imageView.setImage(placeholder);
+            // Load default image if course image fails
+            Image defaultImage = new Image(getClass().getResourceAsStream("/images/C4Uicon.png"));
+            imageView.setImage(defaultImage);
         }
 
         // Course title
@@ -191,4 +200,33 @@ public class MainController implements Initializable {
             }
         }
     }
+    @FXML
+    private void switchToMainAdmin() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/AdminDashboardView.fxml"));
+            Scene scene = new Scene(loader.load());
+
+            // Get the correct controller type
+            AdminDashboardController controller = loader.getController();
+            // Initialize the admin dashboard with current user
+            controller.initData(SessionManager.getInstance().getCurrentUser());
+
+            Stage stage = (Stage) coursesGrid.getScene().getWindow();
+            stage.setScene(scene);
+            stage.setMaximized(false);
+            stage.setResizable(true);
+            stage.centerOnScreen();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Error", "Could not load admin dashboard");
+        }
+    }
+    private void showAlert(Alert.AlertType type, String title, String message) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
 }

@@ -12,24 +12,39 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-
-import java.sql.Connection;
+import javafx.scene.input.MouseEvent; // Import this for handleCourseClick
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
+import java.io.IOException;
 
 public class CourseController {
-    @FXML private ImageView courseImage;
-    @FXML private Label titleLabel;
-    @FXML private Label descriptionLabel;
-    @FXML private Label priceLabel;
-    @FXML private Label levelLabel;
-    @FXML private Label enrollmentCountLabel;
-    @FXML private Button enrollButton;
-    @FXML private ProgressIndicator loadingIndicator;
+    @FXML
+    private ImageView courseImage;
+    @FXML
+    private Label titleLabel;
+    @FXML
+    private Label descriptionLabel;
+    @FXML
+    private Label priceLabel;
+    @FXML
+    private Label levelLabel;
+    @FXML
+    private Label categoryLabel;
+    @FXML
+    private Label enrollmentCountLabel;
+    @FXML
+    private Button enrollButton;
+    @FXML
+    private ProgressIndicator loadingIndicator;
+    @FXML
+    private VBox courseCardContainer;
 
     private Course course;
     private final EnrollmentDAO enrollmentDAO;
     private boolean courseAdded = false;
     private boolean courseUpdated = false;
-    private Object DatabaseConnection;
 
     public CourseController() {
         this.enrollmentDAO = new EnrollmentDAO();
@@ -85,16 +100,22 @@ public class CourseController {
             @Override
             protected Image call() throws Exception {
                 String imageUrl = course.getImageUrl() != null ?
-                        course.getImageUrl() : "https://via.placeholder.com/400x250";
-                return new Image(imageUrl, true);
+                        course.getImageUrl() : "src/main/resources/images/Java-Programming-Masterclass-Beginners-Experts-1024x614.webp";
+                return new Image(getClass().getResourceAsStream(imageUrl));
             }
         };
 
-        imageTask.setOnSucceeded(e -> courseImage.setImage(imageTask.getValue()));
+        imageTask.setOnSucceeded(e ->{
+            if (courseImage != null) {
+                Image image = imageTask.getValue();
+            }
+        }
+        );
         imageTask.setOnFailed(e -> {
-            Image placeholder = new Image("https://via.placeholder.com/400x250?text=Course+Image");
-            courseImage.setImage(placeholder);
-        });
+            if (courseImage != null) {
+                courseImage.setImage(new Image(getClass().getResourceAsStream("/images/default-course.png")));
+            }
+            });
 
         new Thread(imageTask).start();
     }
@@ -131,7 +152,8 @@ public class CourseController {
     }
 
 
-    @FXML private void enrollCourse() {
+    @FXML
+    private void enrollCourse() {
         if (course == null) return;
 
         enrollButton.setDisable(true);
@@ -183,6 +205,7 @@ public class CourseController {
         alert.setContentText(message);
         alert.showAndWait();
     }
+
     public boolean isCourseAdded() {
         return courseAdded;
     }
@@ -206,8 +229,50 @@ public class CourseController {
         }
     }
 
+    public void setCourseData(Course course) {
+        this.course = course;
+        titleLabel.setText(course.getTitle());
+        descriptionLabel.setText(course.getDescription());
+        priceLabel.setText("$" + String.format("%.2f", course.getPrice()));
+        levelLabel.setText(course.getLevel());
+        categoryLabel.setText(course.getCategory());
 
+        // Load course image
+        if (course.getImageUrl() != null && !course.getImageUrl().isEmpty()) ;
+        {
+            try {
+                Image image = new Image(course.getImageUrl(), true);
+                image.errorProperty().addListener((observable, oldValue, newValue) -> {
+                    if (newValue) {
+                        courseImage.setImage(new Image(getClass().getResourceAsStream("/images/default-course.png")));
+                    }
+                });
+                courseImage.setImage(image);
+            } catch (Exception e) {
+                System.err.println("Invalid image URL format: " + course.getImageUrl() + ". Using default.");
+                courseImage.setImage(new Image(getClass().getResourceAsStream("/images/default-course.png")));
+            }
+        }
+    }
 
+    @FXML
+    private void handleCourseClick(MouseEvent event) {
+        if (course != null) {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/coursemanagement/views/course-detail.fxml"));
+                VBox courseDetailView = loader.load();
 
+                CourseController courseController = loader.getController();
+                courseController.setCourse(course); // Pass the course object to the detail controller
 
+                Stage stage = (Stage) courseCardContainer.getScene().getWindow(); // Get the current stage
+                Scene scene = new Scene(courseDetailView);
+                stage.setScene(scene);
+                stage.setTitle("Course Details");
+            } catch (IOException e) {
+                e.printStackTrace();
+                // Optionally show an error alert
+            }
+        }
+    }
 }
