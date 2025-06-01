@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import com.coursemanagement.util.PasswordHasher;
 
-
 public class UserDAO {
     private final DatabaseConnection dbConnection;
 
@@ -14,7 +13,6 @@ public class UserDAO {
         this.dbConnection = DatabaseConnection.getInstance();
     }
 
-    // Authenticate user for login
     public User authenticate(String username, String password) {
         String query = "SELECT user_id, username, email, full_name, password, role FROM users WHERE username = ?";
 
@@ -22,18 +20,18 @@ public class UserDAO {
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
             stmt.setString(1, username);
-            System.out.println("Attempting to authenticate user: " + username); // Debug line
+            System.out.println("Attempting to authenticate user: " + username);
 
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     String storedHash = rs.getString("password");
                     String storedRole = rs.getString("role");
-                    System.out.println("Found user. Stored hash: " + storedHash); // Debug line
-                    System.out.println("User role: " + storedRole); // Debug line
+                    System.out.println("Found user. Stored hash: " + storedHash);
+                    System.out.println("User role: " + storedRole);
 
                     if (storedHash != null) {
                         boolean passwordMatch = PasswordHasher.checkPassword(password, storedHash);
-                        System.out.println("Password match result: " + passwordMatch); // Debug line
+                        System.out.println("Password match result: " + passwordMatch);
 
                         if (passwordMatch) {
                             User user = new User();
@@ -47,7 +45,7 @@ public class UserDAO {
                         }
                     }
                 } else {
-                    System.out.println("No user found with username: " + username); // Debug line
+                    System.out.println("No user found with username: " + username);
                 }
             }
         } catch (SQLException e) {
@@ -59,28 +57,21 @@ public class UserDAO {
 
     }
 
-    // Create new user
     public boolean create(User user) {
         String sql = "INSERT INTO Users (username, password, email, full_name, role) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            // Băm mật khẩu trước khi lưu
-//            String hashedPassword = PasswordHasher.hashPassword(user.getPassword());
-//            user.setPassword(hashedPassword); // Cập nhật mật khẩu đã băm vào đối tượng User
-
             stmt.setString(1, user.getUsername());
-            stmt.setString(2, user.getPassword()); // Lưu mật khẩu đã băm
+            stmt.setString(2, user.getPassword());
             stmt.setString(3, user.getEmail());
             stmt.setString(4, user.getFullName());
-            stmt.setString(5, user.getRole()); // "student", "teacher", "admin"
+            stmt.setString(5, user.getRole());
 
             int rowsAffected = stmt.executeUpdate();
             return rowsAffected > 0;
         } catch (SQLException e) {
             System.err.println("Error creating user: " + e.getMessage());
             e.printStackTrace();
-            // Xử lý exception tốt hơn, có thể ném lại một custom exception
             return false;
         }
     }
@@ -152,21 +143,17 @@ public class UserDAO {
             System.err.println("Error checking email existence for " + email + ": " + e.getMessage());
             e.printStackTrace();
         }
-        return false; // Mặc định là false nếu có lỗi hoặc không tìm thấy
-
+        return false;
     }
 
-    // Update user
     public boolean update(User user) {
-        boolean updatePassword = user.getPassword() != null && !user.getPassword().isEmpty() && !user.getPassword().startsWith("$2a$"); // Heuristic to check if it's a new plain password
-
+        boolean updatePassword = user.getPassword() != null && !user.getPassword().isEmpty() && !user.getPassword().startsWith("$2a$");
         String sql;
         if (updatePassword) {
             sql = "UPDATE users SET username = ?, email = ?, password = ?, full_name = ?, role = ? WHERE user_id = ?";
         } else {
             sql = "UPDATE users SET username = ?, email = ?, full_name = ?, role = ? WHERE user_id = ?";
         }
-
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -177,7 +164,6 @@ public class UserDAO {
             if (updatePassword) {
                 stmt.setString(paramIndex++, PasswordHasher.hashPassword(user.getPassword()));
             }
-
             stmt.setString(paramIndex++, user.getFullName());
             stmt.setString(paramIndex++, user.getRole());
             stmt.setInt(paramIndex, user.getUserId());

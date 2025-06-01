@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.paint.Color?>
+<?import javafx.scene.text.Font?>
+
+<?import javafx.scene.layout.Region?>
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.coursemanagement.controller.CourseController"
+      prefHeight="720.0" prefWidth="1000.0" style="-fx-background-color: #f4f7f9;">
+    <children>
+        <!-- Header -->
+        <HBox alignment="CENTER_LEFT" style="-fx-background-color: white; -fx-padding: 15 40;">
+            <children>
+                <Label text="Course Details" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Button onAction="#handleBack" text="← Back to Courses" style="-fx-background-color: transparent; -fx-font-weight: bold; -fx-text-fill: #3498db; -fx-cursor: hand;" />
+            </children>
+            <effect>
+                <DropShadow height="20.0" radius="9.5" spread="0.0" width="20.0">
+                    <color>
+                        <Color opacity="0.1" />
+                    </color>
+                </DropShadow>
+            </effect>
+        </HBox>
+
+        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-border-color: transparent;" VBox.vgrow="ALWAYS">
+            <content>
+                <VBox spacing="30.0">
+                    <padding>
+                        <Insets bottom="40.0" left="50.0" right="50.0" top="30.0" />
+                    </padding>
+                    <children>
+                        <HBox spacing="40.0">
+                            <children>
+                                <ImageView fx:id="courseImageView" fitHeight="250.0" fitWidth="380.0" preserveRatio="true">
+                                    <effect>
+                                        <DropShadow height="25.0" radius="12.0" width="25.0">
+                                            <color>
+                                                <Color opacity="0.2" />
+                                            </color>
+                                        </DropShadow>
+                                    </effect>
+                                </ImageView>
+                                <VBox spacing="15.0" HBox.hgrow="ALWAYS">
+                                    <children>
+                                        <Label fx:id="titleLabel" wrapText="true" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #2c3e50; -fx-line-spacing: 5px;" />
+                                        <Label fx:id="enrollmentCountLabel" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;" text="0 students enrolled" />
+                                        <HBox alignment="BOTTOM_LEFT" spacing="30.0">
+                                            <children>
+                                                <VBox>
+                                                    <children>
+                                                        <Label text="PRICE" style="-fx-font-size: 12px; -fx-text-fill: #95a5a6; -fx-font-weight: bold;" />
+                                                        <Label fx:id="priceLabel" style="-fx-font-size: 28px; -fx-text-fill: #27ae60; -fx-font-weight: bold;" />
+                                                    </children>
+                                                </VBox>
+                                                <VBox>
+                                                    <children>
+                                                        <Label text="LEVEL" style="-fx-font-size: 12px; -fx-text-fill: #95a5a6; -fx-font-weight: bold;" />
+                                                        <Label fx:id="levelLabel" style="-fx-font-size: 16px; -fx-text-fill: #2c3e50;" />
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                        </HBox>
+                                        <Button fx:id="enrollButton" onAction="#enrollCourse" prefHeight="50.0" prefWidth="250.0" text="ENROLL NOW"
+                                                style="-fx-background-color: linear-gradient(to right, #667eea, #764ba2); -fx-text-fill: white; -fx-padding: 15; -fx-background-radius: 30; -fx-font-size: 16px; -fx-font-weight: bold; -fx-cursor: hand;" />
+                                    </children>
+                                </VBox>
+                            </children>
+                        </HBox>
+
+                        <VBox spacing="15.0" style="-fx-background-color: white; -fx-padding: 30; -fx-background-radius: 15;">
+                            <children>
+                                <Label text="About This Course" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" />
+                                <Label fx:id="descriptionLabel" wrapText="true" style="-fx-font-size: 16px; -fx-text-fill: #34495e; -fx-line-spacing: 6px;" />
+                            </children>
+                            <effect>
+                                <DropShadow height="20.0" radius="9.5" width="20.0">
+                                    <color>
+                                        <Color opacity="0.08" />
+                                    </color>
+                                </DropShadow>
+                            </effect>
+                        </VBox>
+                    </children>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </children>
+</VBox>

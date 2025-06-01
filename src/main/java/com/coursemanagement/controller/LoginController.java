@@ -5,7 +5,7 @@ import com.coursemanagement.dao.UserDAO;
 import com.coursemanagement.model.User;
 import com.coursemanagement.util.SessionManager;
 import com.coursemanagement.util.PasswordHasher;
-import com.coursemanagement.dao.CourseDAO;
+
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -15,6 +15,7 @@ import javafx.scene.control.TabPane;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.util.Optional;
@@ -28,12 +29,13 @@ public class LoginController {
     @FXML private PasswordField regPasswordField;
     @FXML private TextField regFullNameField;
     @FXML private TabPane tabPane;
-    @FXML private TextField emailField;
-    @FXML private Hyperlink forgotPasswordLink;
+    private static final String EMAIL_REGEX = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$";
+    private static final String PASSWORD_REGEX = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$";
+
 
     private UserDAO userDAO ;
     public LoginController() {
-        this.userDAO = new UserDAO(); // Khởi tạo UserDAO ở constructor
+        this.userDAO = new UserDAO();
     }
 
     @FXML
@@ -49,8 +51,7 @@ public class LoginController {
         try {
             User user = userDAO.authenticate(username, plainPassword);
             if (user != null) {
-                SessionManager.getInstance().setCurrentUser(user); // User object đã được điền đủ thông tin từ UserDAO
-
+                SessionManager.getInstance().setCurrentUser(user);
                 if ("ADMIN".equals(user.getRole())) {
                     openAdminDashboard();
                 } else {
@@ -60,7 +61,7 @@ public class LoginController {
             } else {
                 showAlert("Login Failed", "Invalid username or password.");
             }
-        } catch (Exception e) { // Bắt Exception chung hơn nếu UserDAO có thể throw RuntimeException
+        } catch (Exception e) {
             showAlert("Login Error", "An error occurred during login: " + e.getMessage());
             e.printStackTrace();
         }
@@ -70,15 +71,28 @@ public class LoginController {
     private void handleRegister() {
         String username = regUsernameField.getText().trim();
         String email = regEmailField.getText().trim();
-        String password = regPasswordField.getText().trim(); // Mật khẩu thuần
+        String password = regPasswordField.getText();
         String fullName = regFullNameField.getText().trim();
 
         if (username.isEmpty() || email.isEmpty() || password.isEmpty() || fullName.isEmpty()) {
             showAlert("Input Error", "Please fill in all registration fields.");
             return;
         }
+        if (!email.matches(EMAIL_REGEX)) {
+            showAlert( " Input Error", "Email is not valid. Please enter a valid email address: user@example.com");
+            return;
+        }
 
-        // Kiểm tra xem username hoặc email đã tồn tại chưa (tùy chọn, nhưng nên có)
+        if (!password.matches(PASSWORD_REGEX)) {
+            showAlert( "Input Error", "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, and one digit.");
+            return;
+        }
+
+        if (username.contains(" ")) {
+            showAlert( "Input Error", "Username cannot contain spaces.");
+            return;
+        }
+
         if (userDAO.findByUsername(username) != null) {
             showAlert("Registration Failed", "Username already exists. Please choose another one.");
             return;
@@ -90,16 +104,16 @@ public class LoginController {
 
         try {
             String hashedPassword = PasswordHasher.hashPassword(password);
-            User newUser = new User(username, email, hashedPassword, fullName); // Constructor này đặt role="USER"
+            User newUser = new User(username, email, hashedPassword, fullName);
 
-            if (userDAO.create(newUser)) { // Gọi UserDAO.create
+            if (userDAO.create(newUser)) {
                 showAlert("Registration Successful", "Registration successful! Please login.");
-                tabPane.getSelectionModel().select(0); // Chuyển về tab login
+                tabPane.getSelectionModel().select(0);
                 clearRegistrationFields();
             } else {
                 showAlert("Registration Failed", "Could not register user. Please try again or contact support.");
             }
-        } catch (Exception e) { // Bắt Exception chung nếu có lỗi không mong muốn
+        } catch (Exception e) {
             showAlert("Registration Error", "An error occurred during registration: " + e.getMessage());
             e.printStackTrace();
         }
@@ -107,8 +121,8 @@ public class LoginController {
     @FXML
     private void handleForgotPassword() {
         TextInputDialog dialog = new TextInputDialog();
-        dialog.setTitle("Quên mật khẩu");
-        dialog.setHeaderText("Nhập email của bạn");
+        dialog.setTitle("Forgot Password ?");
+        dialog.setHeaderText("Enter your registered email address to reset your password.");
         dialog.setContentText("Email:");
 
         Optional<String> result = dialog.showAndWait();
@@ -117,22 +131,20 @@ public class LoginController {
             User user = userDAO.findByEmail(email);
 
             if (user != null) {
-                // Generate new random password
                 String newPassword = generateRandomPassword();
                 user.setPassword(PasswordHasher.hashPassword(newPassword));
 
                 if (userDAO.update(user)) {
                     Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                    alert.setTitle("Khôi phục mật khẩu");
+                    alert.setTitle(" Reset Password Successful");
                     alert.setHeaderText(null);
-                    alert.setContentText("Mật khẩu mới của bạn là: " + newPassword +
-                            "\nVui lòng đổi mật khẩu sau khi đăng nhập!");
+                    alert.setContentText("Your password has been reset successfully. New password: " + newPassword + "\nPlease change it after logging in.");
                     alert.showAndWait();
                 } else {
-                    showError("Không thể cập nhật mật khẩu mới");
+                    showError(" Password reset failed. Please try again later.");
                 }
             } else {
-                showError("Email không tồn tại trong hệ thống");
+                showError(" Email not found. Please check your email address or register if you don't have an account.");
             }
         }
     }
@@ -167,9 +179,7 @@ public class LoginController {
 
 
             Scene scene = new Scene(root);
-            Stage stage = (Stage) usernameField.getScene().getWindow(); // Lấy stage hiện tại
-
-            // Thiết lập cho cửa sổ chính
+            Stage stage = (Stage) usernameField.getScene().getWindow();
             stage.setTitle("Course Management System ");
             stage.setScene(scene);
             stage.setMaximized(true);
@@ -187,12 +197,9 @@ public class LoginController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/AdminDashboardView.fxml"));
             Parent root = loader.load();
 
-
             Stage stage = (Stage) usernameField.getScene().getWindow();
             Scene scene = new Scene(root);
 
-
-            // Get the controller and pass necessary data
             AdminDashboardController adminController = loader.getController();
             adminController.initData(SessionManager.getInstance().getCurrentUser());
 
@@ -216,11 +223,12 @@ public class LoginController {
     }
 
     private void showAlert(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION); // Hoặc ERROR, WARNING tùy ngữ cảnh
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
-        alert.setHeaderText(null); // Bỏ header nếu không cần
+        alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
     }
+
 
 }

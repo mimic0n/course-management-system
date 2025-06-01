@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.coursemanagement.controller.EnrollmentManagementController"
+      alignment="TOP_CENTER" spacing="15.0">
+    <padding>
+        <Insets top="15.0" right="15.0" bottom="15.0" left="15.0" />
+    </padding>
+    <children>
+        <Label text="Enrollment Management" textFill="#495057">
+            <font>
+                <Font name="System Bold" size="24.0" />
+            </font>
+        </Label>
+        <TableView fx:id="enrollmentTable" prefHeight="400.0" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="enrollmentIdColumn" prefWidth="75.0" text="Enroll ID" />
+                <TableColumn fx:id="studentNameColumn" prefWidth="200.0" text="Student Name" />
+                <TableColumn fx:id="courseTitleColumn" prefWidth="250.0" text="Course Title" />
+                <TableColumn fx:id="enrollmentDateColumn" prefWidth="150.0" text="Enrollment Date" />
+                <TableColumn fx:id="statusColumn" prefWidth="100.0" text="Status" />
+                <TableColumn fx:id="progressColumn" prefWidth="100.0" text="Progress (%)" />
+            </columns>
+            <columnResizePolicy>
+                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+            </columnResizePolicy>
+        </TableView>
+    </children>
+</VBox>

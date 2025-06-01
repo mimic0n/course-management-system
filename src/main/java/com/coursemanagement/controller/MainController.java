@@ -1,6 +1,7 @@
 package com.coursemanagement.controller;
 
 
+import com.coursemanagement.dao.CourseDAO;
 import com.coursemanagement.model.Course;
 import com.coursemanagement.model.DatabaseConnection;
 import com.coursemanagement.model.User;
@@ -26,25 +27,53 @@ public class MainController implements Initializable {
     @FXML
     private Label welcomeLabel;
     @FXML
-    private ScrollPane coursesScrollPane;
-    @FXML
     private GridPane coursesGrid;
+
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        welcomeLabel.setText("Welcome, " + SessionManager.getInstance().getCurrentUser().getFullName() + "!");
-        loadCourses();
+    }
+
+    public void initData(User currentUser) {
+        if (currentUser != null) {
+            try {
+                welcomeLabel.setText("Welcome, " + currentUser.getUsername() + "!");
+                loadCourses();
+            } catch (Exception e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("Failed to load data");
+                alert.setContentText(e.getMessage());
+                alert.showAndWait();
+                e.printStackTrace();
+            }
+        } else {
+
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Warning");
+            alert.setHeaderText("No user logged in");
+            alert.setContentText("Please log in to access this page.");
+            alert.showAndWait();
+
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/login.fxml"));
+                Scene scene = new Scene(loader.load());
+                Stage stage = (Stage) welcomeLabel.getScene().getWindow();
+                stage.setScene(scene);
+            }
+            catch ( IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void loadCourses() {
         List<Course> courses = DatabaseConnection.getAllCourses();
         int column = 0;
         int row = 0;
-
         for (Course course : courses) {
             VBox courseCard = createCourseCard(course);
             coursesGrid.add(courseCard, column, row);
-
             column++;
             if (column == 3) {
                 column = 0;
@@ -59,32 +88,34 @@ public class MainController implements Initializable {
         card.setStyle("-fx-background-color: white; -fx-border-color: #e0e0e0; -fx-border-radius: 8; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 2);");
         card.setPrefWidth(280);
 
-        // Course image
         ImageView imageView = new ImageView();
         imageView.setFitWidth(250);
         imageView.setFitHeight(140);
         imageView.setPreserveRatio(false);
+
         try {
-            Image image = new Image(course.getImageUrl() != null ? course.getImageUrl() : "https://via.placeholder.com/250x140");
+            String imagePath = course.getImageUrl() != null ?
+                    "/images/" + course.getImageUrl() :
+                    "/images/C4Uicon.png";
+
+            Image image = new Image(getClass().getResourceAsStream(imagePath));
+            if (image.isError()) {
+                throw new Exception("Image not found");
+            }
             imageView.setImage(image);
         } catch (Exception e) {
-            Image placeholder = new Image("https://via.placeholder.com/250x140");
-            imageView.setImage(placeholder);
+            Image defaultImage = new Image(getClass().getResourceAsStream("/images/C4Uicon.png"));
+            imageView.setImage(defaultImage);
         }
 
-        // Course title
         Label titleLabel = new Label(course.getTitle());
         titleLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #333;");
         titleLabel.setWrapText(true);
 
-
-        // Price and duration
         Label priceLabel = new Label("$" + course.getPrice() + " • " + " hours • " + course.getLevel());
         priceLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #0066cc; -fx-font-weight: bold;");
 
         card.getChildren().addAll(imageView, titleLabel, priceLabel);
-
-        // Click handler
         card.setOnMouseClicked(e -> openCourseDetail(course));
         card.setOnMouseEntered(e -> card.setStyle(card.getStyle() + "; -fx-cursor: hand;"));
 
@@ -94,7 +125,6 @@ public class MainController implements Initializable {
     @FXML
     private void openCourseDetail(Course course) {
         try {
-            // First verify if the resource exists
             URL resourceUrl = getClass().getResource("/fxml/course-detail.fxml");
             if (resourceUrl == null) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -154,41 +184,32 @@ public class MainController implements Initializable {
         }
     }
 
-    public void initData(User currentUser) {
-        if (currentUser != null) {
-            try {
-                // Update welcome message
-                welcomeLabel.setText("Welcome, " + currentUser.getFullName() + "!");
+    @FXML
+    private void switchToMainAdmin() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/AdminDashboardView.fxml"));
+            Scene scene = new Scene(loader.load());
 
-                // Load courses
-                loadCourses();
+            AdminDashboardController controller = loader.getController();
+            controller.initData(SessionManager.getInstance().getCurrentUser());
 
-            } catch (Exception e) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Error");
-                alert.setHeaderText("Failed to load data");
-                alert.setContentText(e.getMessage());
-                alert.showAndWait();
-                e.printStackTrace();
-            }
-        } else {
-            // Handle case where no user is logged in
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Warning");
-            alert.setHeaderText("No user logged in");
-            alert.setContentText("Please log in to access this page.");
-            alert.showAndWait();
-
-            // Redirect to login
-            try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/login.fxml"));
-                Scene scene = new Scene(loader.load());
-                Stage stage = (Stage) welcomeLabel.getScene().getWindow();
-                stage.setScene(scene);
-            }
-            catch ( IOException e) {
-                e.printStackTrace();
-            }
+            Stage stage = (Stage) coursesGrid.getScene().getWindow();
+            stage.setScene(scene);
+            stage.setMaximized(false);
+            stage.setResizable(true);
+            stage.centerOnScreen();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Error", "Could not load admin dashboard");
         }
     }
+
+    private void showAlert(Alert.AlertType type, String title, String message) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
 }

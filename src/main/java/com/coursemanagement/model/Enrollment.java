@@ -10,11 +10,9 @@ public class Enrollment {
     private String status;
     private int progress;
 
-    // Navigation properties
     private User user;
     private Course course;
 
-    // Constructors
     public Enrollment() {}
 
     public Enrollment(int EuserId, int courseId) {

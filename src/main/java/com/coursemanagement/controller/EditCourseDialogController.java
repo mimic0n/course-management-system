@@ -20,13 +20,13 @@ public class EditCourseDialogController {
     @FXML private TextField imageUrlField;
 
     private Stage dialogStage;
-    private Course course; // The current course being edited
+    private Course courseToEdit; // The current course being edited
     private CourseDAO courseDAO = new CourseDAO();
     private boolean courseUpdated = false;
 
     @FXML
     public void initialize() {
-        levelComboBox.setItems(FXCollections.observableArrayList("Beginner", "Intermediate", "Advanced", "All Levels"));
+        levelComboBox.setItems(FXCollections.observableArrayList("Beginner", "Intermediate", "Advanced"));
         categoryComboBox.setItems(FXCollections.observableArrayList("Development", "Business", "Design", "Marketing", "IT & Software", "Personal Development", "Photography", "Music"));
     }
 
@@ -35,8 +35,7 @@ public class EditCourseDialogController {
     }
 
     public void setCourseToEdit(Course course) {
-        this.course = course;
-        // Populate fields with existing course data
+        this.courseToEdit = course;
         if (course != null) {
             titleField.setText(course.getTitle());
             descriptionArea.setText(course.getDescription());
@@ -53,7 +52,7 @@ public class EditCourseDialogController {
 
     @FXML
     private void handleSaveCourse() {
-        if (this.course == null) {
+        if (this.courseToEdit == null) {
             showAlert(Alert.AlertType.ERROR, "Error", "No course selected for editing.");
             return;
         }
@@ -83,15 +82,15 @@ public class EditCourseDialogController {
         }
 
         // Update the existing course object
-        course.setTitle(title);
-        course.setDescription(description);
-        course.setPrice(price);
-        course.setLevel(level);
-        course.setCategory(category);
-        course.setImageUrl(imageUrl.isEmpty() ? null : imageUrl);
+        courseToEdit.setTitle(title);
+        courseToEdit.setDescription(description);
+        courseToEdit.setPrice(price);
+        courseToEdit.setLevel(level);
+        courseToEdit.setCategory(category);
+        courseToEdit.setImageUrl(imageUrl.isEmpty() ? null : imageUrl);
 
 
-        if (courseDAO.update(course)) {
+        if (courseDAO.update(courseToEdit)) {
             courseUpdated = true;
             showAlert(Alert.AlertType.INFORMATION, "Success", "Course updated successfully!");
             dialogStage.close();
@@ -111,5 +110,58 @@ public class EditCourseDialogController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+
+    @FXML
+    private void handleUpdate() {
+        if (validateInput()) {
+            courseToEdit.setTitle(titleField.getText());
+            courseToEdit.setDescription(descriptionArea.getText());
+            courseToEdit.setPrice(Double.parseDouble(priceField.getText()));
+            courseToEdit.setLevel(levelComboBox.getValue());
+            courseToEdit.setCategory(categoryComboBox.getValue());
+            courseToEdit.setImageUrl(imageUrlField.getText());
+
+            if (courseDAO.update(courseToEdit)) {
+                courseUpdated = true;
+                dialogStage.close();
+            } else {
+                showAlert(Alert.AlertType.ERROR, "Error", "Failed to update course");
+            }
+        }
+    }
+
+
+    private boolean validateInput() {
+        String errorMessage = "";
+        if (titleField.getText().isEmpty()) {
+            errorMessage += "Course title is required\n";
+        }
+        if (descriptionArea.getText().isEmpty()) {
+            errorMessage += "Course description is required\n";
+        }
+        if (priceField.getText().isEmpty()) {
+            errorMessage += "Price is required\n";
+        } else {
+            try {
+                Double.parseDouble(priceField.getText());
+            } catch (NumberFormatException e) {
+                errorMessage += "Price must be a valid number\n";
+            }
+        }
+        if (levelComboBox.getValue() == null) {
+            errorMessage += "Level is required\n";
+        }
+        if (categoryComboBox.getValue().isEmpty()) {
+            errorMessage += "Category is required\n";
+        }
+
+        if (errorMessage.isEmpty()) {
+            return true;
+        } else {
+            showAlert(Alert.AlertType.ERROR, "Validation Error", errorMessage);
+            return false;
+        }
     }
 }

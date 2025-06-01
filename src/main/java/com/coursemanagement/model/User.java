@@ -28,7 +28,7 @@ public class User {
         this.password = new SimpleStringProperty(hashPassword(password));
         this.email = new SimpleStringProperty(email);
         this.fullName = new SimpleStringProperty(fullName);
-        this.role = new SimpleStringProperty(role); // Default role
+        this.role = new SimpleStringProperty(role);
     }
 
     public User( IntegerProperty id, StringProperty username1, StringProperty email1, StringProperty password1, StringProperty fullName1, StringProperty role1) {
@@ -42,7 +42,7 @@ public class User {
     public User(int id, String username, String email, String fullName, String role) {
         this.user_id = new SimpleIntegerProperty(id);
         this.username = new SimpleStringProperty(username);
-        this.password = new SimpleStringProperty(""); // Password is not updated through this constructor
+        this.password = new SimpleStringProperty("");
         this.email = new SimpleStringProperty(email);
         this.fullName = new SimpleStringProperty(fullName);
         this.role = new SimpleStringProperty(role);
@@ -63,7 +63,7 @@ public class User {
         this.email = new SimpleStringProperty(email);
         this.password = new SimpleStringProperty(hashedPassword);
         this.fullName = new SimpleStringProperty(fullName);
-        this.role = new SimpleStringProperty("ADMIN"); // Default role
+        this.role = new SimpleStringProperty("USER");
     }
 
     public User(int userId, String username, String password, String email, String fullName, String role) {

@@ -14,19 +14,27 @@ public class EnrollmentDAO {
         this.dbConnection = DatabaseConnection.getInstance();
     }
 
-    // Enroll user in course
+    private Enrollment mapResultSetToEnrollment(ResultSet rs) throws SQLException {
+        Enrollment enrollment = new Enrollment();
+        enrollment.setId(rs.getInt("enrollment_id"));
+        enrollment.setUserId(rs.getInt("user_id"));
+        enrollment.setCourseId(rs.getInt("course_id"));
+        enrollment.setEnrollmentDate(rs.getTimestamp("enrollment_date").toLocalDateTime());
+        enrollment.setStatus(rs.getString("status"));
+        enrollment.setProgress(rs.getInt("progress"));
+        return enrollment;
+    }
+
     public boolean enroll(int userId, int courseId) {
-        String sql = "INSERT INTO enrollments (user_id, course_id, status, progress) VALUES (?, ?, 'ACTIVE', 0)";
+        String sql = "INSERT INTO enrollments (user_id, course_id) VALUES (?, ?)";
         Connection conn = null;
         PreparedStatement stmt = null;
-
         try {
-            conn = dbConnection.getConnection();
-            stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, userId);
-            stmt.setInt(2, courseId);
-
-            return stmt.executeUpdate() > 0;
+        conn = com.coursemanagement.model.DatabaseConnection.getConnection();
+        stmt = conn.prepareStatement(sql);
+        stmt.setInt(1, userId);
+        stmt.setInt(2, courseId);
+        return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             System.err.println("Error enrolling user: " + e.getMessage());
         } finally {
@@ -36,13 +44,11 @@ public class EnrollmentDAO {
         return false;
     }
 
-    // Check if user is enrolled in course
     public boolean isEnrolled(int userId, int courseId) {
         String sql = "SELECT COUNT(*) FROM enrollments WHERE user_id = ? AND course_id = ?";
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
-
         try {
             conn = dbConnection.getConnection();
             stmt = conn.prepareStatement(sql);
@@ -63,7 +69,6 @@ public class EnrollmentDAO {
         return false;
     }
 
-    // Get user's enrolled courses
     public List<Course> getUserEnrolledCourses(int userId) {
         List<Course> courses = new ArrayList<>();
         String sql = """
@@ -103,7 +108,6 @@ public class EnrollmentDAO {
         return courses;
     }
 
-    // Get all enrollments for a course
     public List<Enrollment> getCourseEnrollments(int courseId) {
         List<Enrollment> enrollments = new ArrayList<>();
         String sql = """
@@ -146,7 +150,6 @@ public class EnrollmentDAO {
         return enrollments;
     }
 
-    // Update enrollment progress
     public boolean updateProgress(int userId, int courseId, int progress) {
         String sql = "UPDATE enrollments SET progress = ? WHERE user_id = ? AND course_id = ?";
         Connection conn = null;
@@ -169,7 +172,6 @@ public class EnrollmentDAO {
         return false;
     }
 
-    // Update enrollment status
     public boolean updateStatus(int userId, int courseId, String status) {
         String sql = "UPDATE enrollments SET status = ? WHERE user_id = ? AND course_id = ?";
         Connection conn = null;
@@ -192,12 +194,7 @@ public class EnrollmentDAO {
         return false;
     }
 
-    // Cancel enrollment (soft delete)
-    public boolean cancelEnrollment(int userId, int courseId) {
-        return updateStatus(userId, courseId, "CANCELLED");
-    }
 
-    // Get enrollment details
     public Enrollment getEnrollment(int userId, int courseId) {
         String sql = "SELECT * FROM enrollments WHERE user_id = ? AND course_id = ?";
         Connection conn = null;
@@ -224,7 +221,6 @@ public class EnrollmentDAO {
         return null;
     }
 
-    // Get enrollment statistics for admin
     public int getTotalEnrollments() {
         String sql = "SELECT COUNT(*) FROM enrollments WHERE status = 'ACTIVE'";
         Connection conn = null;
@@ -249,7 +245,6 @@ public class EnrollmentDAO {
         return 0;
     }
 
-    // Get enrollment count for a specific course
     public int getCourseEnrollmentCount(int courseId) {
         String sql = "SELECT COUNT(*) FROM enrollments WHERE course_id = ? AND status = 'ACTIVE'";
         Connection conn = null;
@@ -275,15 +270,50 @@ public class EnrollmentDAO {
         return 0;
     }
 
-    // Helper method to map ResultSet to Enrollment object
-    private Enrollment mapResultSetToEnrollment(ResultSet rs) throws SQLException {
-        Enrollment enrollment = new Enrollment();
-        enrollment.setId(rs.getInt("id"));
-        enrollment.setUserId(rs.getInt("user_id"));
-        enrollment.setCourseId(rs.getInt("course_id"));
-        enrollment.setEnrollmentDate(rs.getTimestamp("enrollment_date").toLocalDateTime());
-        enrollment.setStatus(rs.getString("status"));
-        enrollment.setProgress(rs.getInt("progress"));
-        return enrollment;
+    public List<Enrollment> findAllWithDetails() {
+        List<Enrollment> enrollments = new ArrayList<>();
+        String sql = """
+            SELECT
+                e.enrollment_id, e.enrollment_date, e.status, e.progress,
+                u.user_id, u.username, u.full_name,
+                c.course_id, c.title
+            FROM
+                enrollments e
+            LEFT JOIN
+                users u ON e.user_id = u.user_id
+            LEFT JOIN
+                courses c ON e.course_id = c.course_id
+            ORDER BY
+                e.enrollment_date DESC
+            """;
+        try( Connection conn = dbConnection.getConnection();
+             Statement stmt = conn.prepareStatement(sql)) {
+            ResultSet rs = stmt.executeQuery(sql);
+
+            while (rs.next()){
+                User user = new User();
+                user.setUserId(rs.getInt("user_id"));
+                user.setUsername(rs.getString("username"));
+                user.setFullName(rs.getString("full_name"));
+
+                Course course = new Course();
+                course.setId(rs.getInt("course_id"));
+                course.setTitle(rs.getString("title"));
+
+                Enrollment enrollment = new Enrollment();
+                enrollment.setId(rs.getInt("enrollment_id"));
+                enrollment.setEnrollmentDate(rs.getTimestamp("enrollment_date").toLocalDateTime());
+                enrollment.setStatus(rs.getString("status"));
+                enrollment.setProgress(rs.getInt("progress"));
+
+                enrollment.setUser(user);
+                enrollment.setCourse(course);
+                enrollments.add(enrollment);
+            }
+
+        } catch (SQLException e) {
+          throw new RuntimeException(e);
+        } ;
+        return enrollments;
     }
 }

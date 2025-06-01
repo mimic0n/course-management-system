@@ -12,24 +12,39 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-
-import java.sql.Connection;
+import javafx.scene.input.MouseEvent; // Import this for handleCourseClick
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
+import java.io.IOException;
 
 public class CourseController {
-    @FXML private ImageView courseImage;
-    @FXML private Label titleLabel;
-    @FXML private Label descriptionLabel;
-    @FXML private Label priceLabel;
-    @FXML private Label levelLabel;
-    @FXML private Label enrollmentCountLabel;
-    @FXML private Button enrollButton;
-    @FXML private ProgressIndicator loadingIndicator;
+    @FXML
+    private ImageView courseImage;
+    @FXML
+    private Label titleLabel;
+    @FXML
+    private Label descriptionLabel;
+    @FXML
+    private Label priceLabel;
+    @FXML
+    private Label levelLabel;
+    @FXML
+    private Label categoryLabel;
+    @FXML
+    private Label enrollmentCountLabel;
+    @FXML
+    private Button enrollButton;
+    @FXML
+    private ProgressIndicator loadingIndicator;
+    @FXML
+    private VBox courseCardContainer;
 
     private Course course;
     private final EnrollmentDAO enrollmentDAO;
     private boolean courseAdded = false;
     private boolean courseUpdated = false;
-    private Object DatabaseConnection;
 
     public CourseController() {
         this.enrollmentDAO = new EnrollmentDAO();
@@ -47,14 +62,8 @@ public class CourseController {
             priceLabel.setText("$" + String.format("%.2f", course.getPrice()));
             levelLabel.setText(course.getLevel());
 
-
-            // Load enrollment count
             loadEnrollmentCount();
-
-            // Load course image
             loadCourseImage();
-
-            // Check enrollment status
             checkEnrollmentStatus();
         }
     }
@@ -70,7 +79,9 @@ public class CourseController {
 
         countTask.setOnSucceeded(e -> {
             int count = countTask.getValue();
-            enrollmentCountLabel.setText(count + " students enrolled");
+            if (enrollmentCountLabel != null) {
+                enrollmentCountLabel.setText(count + " students enrolled");
+            }
         });
 
         countTask.setOnFailed(e -> {
@@ -84,16 +95,30 @@ public class CourseController {
         Task<Image> imageTask = new Task<Image>() {
             @Override
             protected Image call() throws Exception {
-                String imageUrl = course.getImageUrl() != null ?
-                        course.getImageUrl() : "https://via.placeholder.com/400x250";
-                return new Image(imageUrl, true);
+                String imagePath = course.getImageUrl();
+                if (imagePath == null || imagePath.isBlank()) {
+                    imagePath = "/images/C4Uicon.png";
+                } else {
+                    imagePath = "/" + imagePath;
+                }
+                return new Image(getClass().getResourceAsStream(imagePath));
             }
         };
 
-        imageTask.setOnSucceeded(e -> courseImage.setImage(imageTask.getValue()));
+        imageTask.setOnSucceeded(e -> {
+            if (courseImage != null) {
+                Image loadedImage = imageTask.getValue();
+                if (loadedImage != null && !loadedImage.isError()) {
+                    courseImage.setImage(loadedImage);
+                } else {
+                    courseImage.setImage(new Image(getClass().getResourceAsStream("/images/C4Uicon.png")));
+                }
+            }
+        });
         imageTask.setOnFailed(e -> {
-            Image placeholder = new Image("https://via.placeholder.com/400x250?text=Course+Image");
-            courseImage.setImage(placeholder);
+            if (courseImage != null) {
+                courseImage.setImage(new Image(getClass().getResourceAsStream("/images/C4Uicon.png")));
+            }
         });
 
         new Thread(imageTask).start();
@@ -111,14 +136,16 @@ public class CourseController {
 
         checkTask.setOnSucceeded(e -> {
             boolean isEnrolled = checkTask.getValue();
-            if (isEnrolled) {
-                enrollButton.setText("Already Enrolled");
-                enrollButton.setDisable(true);
-                enrollButton.setStyle("-fx-background-color: #28a745; -fx-text-fill: white; -fx-padding: 15; -fx-border-radius: 25; -fx-background-radius: 25; -fx-font-size: 16px; -fx-font-weight: bold;");
-            } else {
-                enrollButton.setText("Enroll Now");
-                enrollButton.setDisable(false);
-                enrollButton.setStyle("-fx-background-color: #667eea; -fx-text-fill: white; -fx-padding: 15; -fx-border-radius: 25; -fx-background-radius: 25; -fx-font-size: 16px; -fx-font-weight: bold;");
+            if (enrollButton != null) {
+                if (isEnrolled) {
+                    enrollButton.setText("Already Enrolled");
+                    enrollButton.setDisable(true);
+                    enrollButton.setStyle("-fx-background-color: #28a745; -fx-text-fill: white; -fx-padding: 15; -fx-border-radius: 25; -fx-background-radius: 25; -fx-font-size: 16px; -fx-font-weight: bold;");
+                } else {
+                    enrollButton.setText("Enroll Now");
+                    enrollButton.setDisable(false);
+                    enrollButton.setStyle("-fx-background-color: #667eea; -fx-text-fill: white; -fx-padding: 15; -fx-border-radius: 25; -fx-background-radius: 25; -fx-font-size: 16px; -fx-font-weight: bold;");
+                }
             }
         });
 
@@ -131,9 +158,18 @@ public class CourseController {
     }
 
 
-    @FXML private void enrollCourse() {
-        if (course == null) return;
-
+    @FXML
+    private void enrollCourse() {
+        if (course == null) {
+            return;
+        };
+        if (course == null ) {
+            return;
+        }
+        if(SessionManager.getInstance().getCurrentUser()== null) {
+            showAlert("Error", "Please login to enroll in a course.", Alert.AlertType.ERROR);
+            return;
+        }
         enrollButton.setDisable(true);
         showLoading(true);
 
@@ -143,7 +179,7 @@ public class CourseController {
             @Override
             protected Boolean call() throws Exception {
                 return enrollmentDAO.enroll(currentUserId, course.getId());
-            }
+            } //call to the database to enroll the user in the course
         };
 
         enrollTask.setOnSucceeded(e -> {
@@ -183,31 +219,5 @@ public class CourseController {
         alert.setContentText(message);
         alert.showAndWait();
     }
-    public boolean isCourseAdded() {
-        return courseAdded;
-    }
-
-    public boolean isCourseUpdated() {
-        return courseUpdated;
-    }
-
-    // Update the enrollCourse method to set courseAdded
-
-
-    // Add a method to update course
-    public void updateCourse(Course updatedCourse) {
-        // Logic to update course
-        try {
-            // Update course logic here
-            courseUpdated = true;
-        } catch (Exception e) {
-            courseUpdated = false;
-            e.printStackTrace();
-        }
-    }
-
-
-
-
 
 }

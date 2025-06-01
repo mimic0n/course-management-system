@@ -42,7 +42,6 @@ public class Course {
         this.imageUrl = new SimpleStringProperty();
     }
 
-    // Property accessors
     public IntegerProperty idProperty() {
         return CourseID;
     }

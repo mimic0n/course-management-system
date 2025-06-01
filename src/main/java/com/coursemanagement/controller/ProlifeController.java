@@ -28,7 +28,7 @@ public class ProlifeController implements Initializable {
             usernameField.setText(currentUser.getUsername());
             emailField.setText(currentUser.getEmail());
             fullNameField.setText(currentUser.getFullName());
-            usernameField.setEditable(false); // Username shouldn't be editable
+            usernameField.setEditable(false);
         }
     }
 

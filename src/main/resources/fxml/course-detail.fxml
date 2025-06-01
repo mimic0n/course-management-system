@@ -64,8 +64,7 @@
                                             </children>
                                         </HBox>
 
-                                        <Button onAction="#enrollCourse" prefWidth="200.0" text="Enroll Now"
-                                                style="-fx-background-color: #667eea; -fx-text-fill: white; -fx-padding: 15; -fx-border-radius: 25; -fx-background-radius: 25; -fx-font-size: 16px; -fx-font-weight: bold;" />
+                                        <Button fx:id="enrollButton" onAction="#enrollCourse" text="Enroll Now" style="-fx-background-color: #667eea; -fx-text-fill: white; -fx-padding: 15; -fx-border-radius: 25; -fx-background-radius: 25; -fx-font-size: 16px; -fx-font-weight: bold;" />
                                     </children>
                                 </VBox>
                             </children>

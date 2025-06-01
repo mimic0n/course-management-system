@@ -13,19 +13,20 @@ import javafx.stage.Stage;
 public class EditUserDialogController {
 
     @FXML private TextField usernameField;
-    @FXML private PasswordField passwordField; // Để trống nếu không thay đổi
+    @FXML private PasswordField passwordField;
     @FXML private TextField emailField;
     @FXML private TextField fullNameField;
     @FXML private ComboBox<String> roleComboBox;
+    private static final String EMAIL_REGEX = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$";
 
     private Stage dialogStage;
-    private User user; // Người dùng hiện tại đang được chỉnh sửa
+    private User user;
     private UserDAO userDAO = new UserDAO();
     private boolean userUpdated = false;
 
     @FXML
     public void initialize() {
-        roleComboBox.setItems(FXCollections.observableArrayList("student", "teacher", "admin"));
+        roleComboBox.setItems(FXCollections.observableArrayList("USER" , "ADMIN"));
     }
 
     public void setDialogStage(Stage dialogStage) {
@@ -34,7 +35,6 @@ public class EditUserDialogController {
 
     public void setUser(User user) {
         this.user = user;
-        // Điền dữ liệu của người dùng vào các trường
         usernameField.setText(user.getUsername());
         emailField.setText(user.getEmail());
         fullNameField.setText(user.getFullName());
@@ -48,17 +48,23 @@ public class EditUserDialogController {
     @FXML
     private void handleSaveUser() {
         String username = usernameField.getText();
-        String password = passwordField.getText(); // Mật khẩu mới, có thể trống
+        String password = passwordField.getText();
         String email = emailField.getText();
         String fullName = fullNameField.getText();
         String role = roleComboBox.getValue();
 
-        if (username.isEmpty() || email.isEmpty() || fullName.isEmpty() || role == null) {
-            showAlert(Alert.AlertType.WARNING, "Lỗi Nhập liệu", "Vui lòng điền đầy đủ các trường bắt buộc.");
+        if (username.isEmpty() || password.isEmpty() || email.isEmpty() || fullName.isEmpty() || role == null) {
+            showAlert(Alert.AlertType.WARNING, "Lỗi Nhập liệu", "Vui lòng điền đầy đủ tất cả các trường.");
             return;
         }
-        if (!email.matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
-            showAlert(Alert.AlertType.WARNING, "Lỗi Email", "Định dạng email không hợp lệ.");
+
+        if (!email.matches(EMAIL_REGEX)) {
+            showAlert(Alert.AlertType.WARNING, "Lỗi Email", "Định dạng email không hợp lệ. Ví dụ: user@example.com");
+            return;
+        }
+
+        if (username.contains(" ")) {
+            showAlert(Alert.AlertType.WARNING, "Lỗi Tên đăng nhập", "Tên đăng nhập không được chứa khoảng trắng.");
             return;
         }
 
@@ -66,14 +72,6 @@ public class EditUserDialogController {
         user.setEmail(email);
         user.setFullName(fullName);
         user.setRole(role);
-
-        // Chỉ cập nhật mật khẩu nếu người dùng nhập mật khẩu mới
-        if (!password.isEmpty()) {
-            user.setPassword(password); // Mật khẩu này sẽ được băm trong DAO
-        } else {
-            user.setPassword(null); // Đặt là null để DAO biết không cập nhật mật khẩu
-        }
-
 
         if (userDAO.update(user)) {
             userUpdated = true;
