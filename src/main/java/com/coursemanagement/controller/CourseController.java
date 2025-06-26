@@ -95,6 +95,7 @@ public class CourseController {
         Task<Image> imageTask = new Task<Image>() {
             @Override
             protected Image call() throws Exception {
+<<<<<<< HEAD
                 String imagePath = course.getImageUrl();
                 if (imagePath == null || imagePath.isBlank()) {
                     imagePath = "/images/C4Uicon.png";
@@ -120,6 +121,25 @@ public class CourseController {
                 courseImage.setImage(new Image(getClass().getResourceAsStream("/images/C4Uicon.png")));
             }
         });
+=======
+                String imageUrl = course.getImageUrl() != null ?
+                        course.getImageUrl() : "src/main/resources/images/Java-Programming-Masterclass-Beginners-Experts-1024x614.webp";
+                return new Image(getClass().getResourceAsStream(imageUrl));
+            }
+        };
+
+        imageTask.setOnSucceeded(e ->{
+            if (courseImage != null) {
+                Image image = imageTask.getValue();
+            }
+        }
+        );
+        imageTask.setOnFailed(e -> {
+            if (courseImage != null) {
+                courseImage.setImage(new Image(getClass().getResourceAsStream("/images/default-course.png")));
+            }
+            });
+>>>>>>> origin/main
 
         new Thread(imageTask).start();
     }
@@ -160,6 +180,7 @@ public class CourseController {
 
     @FXML
     private void enrollCourse() {
+<<<<<<< HEAD
         if (course == null) {
             return;
         };
@@ -170,6 +191,10 @@ public class CourseController {
             showAlert("Error", "Please login to enroll in a course.", Alert.AlertType.ERROR);
             return;
         }
+=======
+        if (course == null) return;
+
+>>>>>>> origin/main
         enrollButton.setDisable(true);
         showLoading(true);
 
@@ -219,5 +244,78 @@ public class CourseController {
         alert.setContentText(message);
         alert.showAndWait();
     }
+<<<<<<< HEAD
 
+=======
+
+    public boolean isCourseAdded() {
+        return courseAdded;
+    }
+
+    public boolean isCourseUpdated() {
+        return courseUpdated;
+    }
+
+    // Update the enrollCourse method to set courseAdded
+
+
+    // Add a method to update course
+    public void updateCourse(Course updatedCourse) {
+        // Logic to update course
+        try {
+            // Update course logic here
+            courseUpdated = true;
+        } catch (Exception e) {
+            courseUpdated = false;
+            e.printStackTrace();
+        }
+    }
+
+    public void setCourseData(Course course) {
+        this.course = course;
+        titleLabel.setText(course.getTitle());
+        descriptionLabel.setText(course.getDescription());
+        priceLabel.setText("$" + String.format("%.2f", course.getPrice()));
+        levelLabel.setText(course.getLevel());
+        categoryLabel.setText(course.getCategory());
+
+        // Load course image
+        if (course.getImageUrl() != null && !course.getImageUrl().isEmpty()) ;
+        {
+            try {
+                Image image = new Image(course.getImageUrl(), true);
+                image.errorProperty().addListener((observable, oldValue, newValue) -> {
+                    if (newValue) {
+                        courseImage.setImage(new Image(getClass().getResourceAsStream("/images/default-course.png")));
+                    }
+                });
+                courseImage.setImage(image);
+            } catch (Exception e) {
+                System.err.println("Invalid image URL format: " + course.getImageUrl() + ". Using default.");
+                courseImage.setImage(new Image(getClass().getResourceAsStream("/images/default-course.png")));
+            }
+        }
+    }
+
+    @FXML
+    private void handleCourseClick(MouseEvent event) {
+        if (course != null) {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/coursemanagement/views/course-detail.fxml"));
+                VBox courseDetailView = loader.load();
+
+                CourseController courseController = loader.getController();
+                courseController.setCourse(course); // Pass the course object to the detail controller
+
+                Stage stage = (Stage) courseCardContainer.getScene().getWindow(); // Get the current stage
+                Scene scene = new Scene(courseDetailView);
+                stage.setScene(scene);
+                stage.setTitle("Course Details");
+            } catch (IOException e) {
+                e.printStackTrace();
+                // Optionally show an error alert
+            }
+        }
+    }
+>>>>>>> origin/main
 }

@@ -36,6 +36,10 @@ public class EditCourseDialogController {
 
     public void setCourseToEdit(Course course) {
         this.courseToEdit = course;
+<<<<<<< HEAD
+=======
+        // Populate fields with existing course data
+>>>>>>> origin/main
         if (course != null) {
             titleField.setText(course.getTitle());
             descriptionArea.setText(course.getDescription());

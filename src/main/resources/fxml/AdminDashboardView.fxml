@@ -57,6 +57,10 @@
                                         <TableColumn fx:id="coursePriceColumn" prefWidth="100.0" text="Price" />
                                         <TableColumn fx:id="courseLevelColumn" prefWidth="120.0" text="Level" />
                                         <TableColumn fx:id="courseCategoryColumn" prefWidth="120.0" text="Category" />
+<<<<<<< HEAD
+=======
+                                        <TableColumn fx:id="courseImageUrlColumn" prefWidth="150.0" text="Image URL" />
+>>>>>>> origin/main
                                     </columns>
                                     <columnResizePolicy>
                                         <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />

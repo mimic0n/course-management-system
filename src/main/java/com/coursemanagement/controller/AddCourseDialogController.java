@@ -25,96 +25,63 @@ public class AddCourseDialogController {
 
     @FXML
     public void initialize() {
-        levelComboBox.setItems(FXCollections.observableArrayList("Beginner", "Intermediate", "Advanced"));
-        levelComboBox.getSelectionModel().selectFirst();
+        // Configure ComboBoxes for level and category
+        levelComboBox.setItems(FXCollections.observableArrayList("Beginner", "Intermediate", "Advanced", "All Levels"));
+        levelComboBox.getSelectionModel().selectFirst(); // Default selection
+
         categoryComboBox.setItems(FXCollections.observableArrayList("Development", "Business", "Design", "Marketing", "IT & Software", "Personal Development", "Photography", "Music"));
-        categoryComboBox.getSelectionModel().selectFirst();
+        categoryComboBox.getSelectionModel().selectFirst(); // Default selection
     }
 
+    public void setDialogStage(Stage dialogStage) {
+        this.dialogStage = dialogStage;
+    }
 
     public boolean isCourseAdded() {
         return courseAdded;
     }
 
-    private boolean validateInput() {
-        String errorMessage = "";
-        if (titleField.getText().isEmpty()) {
-            errorMessage += "Course title is required\n";
-        }
-        if (descriptionArea.getText().isEmpty()) {
-            errorMessage += "Course description is required\n";
-        }
-        if (priceField.getText().isEmpty()) {
-            errorMessage += "Price is required\n";
-        } else {
-            try {
-                Double.parseDouble(priceField.getText());
-            } catch (NumberFormatException e) {
-                errorMessage += "Price must be a valid number\n";
-            }
-        }
-        if (levelComboBox.getValue() == null) {
-            errorMessage += "Level is required\n";
-        }
-        if (categoryComboBox.getValue() == null || categoryComboBox.getValue().isEmpty()) {
-            errorMessage += "Category is required\n";
-        }
-
-        if (errorMessage.isEmpty()) {
-            return true;
-        } else {
-            showAlert(Alert.AlertType.ERROR, "Validation Error", errorMessage);
-            return false;
-        }
-    }
-
     @FXML
     private void handleSaveCourse() {
-        if (!validateInput()) {
-            String title = titleField.getText().trim();
-            String description = descriptionArea.getText().trim();
-            String priceText = priceField.getText().trim();
-            String level = levelComboBox.getValue();
-            String category = categoryComboBox.getValue();
-            String imageUrl = imageUrlField.getText().trim();
+        String title = titleField.getText().trim();
+        String description = descriptionArea.getText().trim();
+        String priceText = priceField.getText().trim();
+        String level = levelComboBox.getValue();
+        String category = categoryComboBox.getValue();
+        String imageUrl = imageUrlField.getText().trim();
 
-            if (title.isEmpty() || description.isEmpty() || priceText.isEmpty() || level == null || category == null) {
-                showAlert(Alert.AlertType.WARNING, "Input Error", "Please fill in all required fields (Title, Description, Price, Level, Category).");
+        if (title.isEmpty() || description.isEmpty() || priceText.isEmpty() || level == null || category == null) {
+            showAlert(Alert.AlertType.WARNING, "Input Error", "Please fill in all required fields (Title, Description, Price, Level, Category).");
+            return;
+        }
+
+        double price;
+        try {
+            price = Double.parseDouble(priceText);
+            if (price < 0) {
+                showAlert(Alert.AlertType.WARNING, "Input Error", "Price cannot be negative.");
                 return;
             }
-            double price;
-            try {
-                price = Double.parseDouble(priceText);
-                if (price < 0) {
-                    showAlert(Alert.AlertType.WARNING, "Input Error", "Price cannot be negative.");
-                    return;
-                }
-            } catch (NumberFormatException e) {
-                showAlert(Alert.AlertType.WARNING, "Input Error", "Invalid price format. Please enter a valid number.");
-                return;
-            }
+        } catch (NumberFormatException e) {
+            showAlert(Alert.AlertType.WARNING, "Input Error", "Invalid price format. Please enter a valid number.");
+            return;
+        }
 
+        // Use the constructor that doesn't require an ID for new courses
+        Course newCourse = new Course(title, description, price, level, category, imageUrl.isEmpty() ? null : imageUrl);
 
-            Course newCourse = new Course(title, description, price, level, category, imageUrl.isEmpty() ? null : imageUrl);
-
-            if (courseDAO.create(newCourse)) {
-                courseAdded = true;
-                showAlert(Alert.AlertType.INFORMATION, "Success", "Course added successfully!");
-                dialogStage.close();
-            } else {
-                showAlert(Alert.AlertType.ERROR, "Error", "Could not add course. The course title might already exist or another error occurred.");
-            }
+        if (courseDAO.create(newCourse)) {
+            courseAdded = true;
+            showAlert(Alert.AlertType.INFORMATION, "Success", "Course added successfully!");
+            dialogStage.close();
+        } else {
+            showAlert(Alert.AlertType.ERROR, "Error", "Could not add course. The course title might already exist or another error occurred.");
         }
     }
 
     @FXML
     private void handleCancel() {
         dialogStage.close();
-    }
-
-    private void closeDialog() {
-        Stage stage = (Stage) titleField.getScene().getWindow();
-        stage.close();
     }
 
     private void showAlert(Alert.AlertType type, String title, String message) {

@@ -6,6 +6,10 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
+<<<<<<< HEAD
+=======
+import javax.swing.*;
+>>>>>>> origin/main
 
 public class CourseManagementApp extends Application {
     @Override

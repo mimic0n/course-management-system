@@ -104,6 +104,10 @@ public class MainController implements Initializable {
             }
             imageView.setImage(image);
         } catch (Exception e) {
+<<<<<<< HEAD
+=======
+            // Load default image if course image fails
+>>>>>>> origin/main
             Image defaultImage = new Image(getClass().getResourceAsStream("/images/C4Uicon.png"));
             imageView.setImage(defaultImage);
         }
@@ -203,7 +207,31 @@ public class MainController implements Initializable {
             showAlert(Alert.AlertType.ERROR, "Error", "Could not load admin dashboard");
         }
     }
+<<<<<<< HEAD
 
+=======
+    @FXML
+    private void switchToMainAdmin() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/AdminDashboardView.fxml"));
+            Scene scene = new Scene(loader.load());
+
+            // Get the correct controller type
+            AdminDashboardController controller = loader.getController();
+            // Initialize the admin dashboard with current user
+            controller.initData(SessionManager.getInstance().getCurrentUser());
+
+            Stage stage = (Stage) coursesGrid.getScene().getWindow();
+            stage.setScene(scene);
+            stage.setMaximized(false);
+            stage.setResizable(true);
+            stage.centerOnScreen();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Error", "Could not load admin dashboard");
+        }
+    }
+>>>>>>> origin/main
     private void showAlert(Alert.AlertType type, String title, String message) {
         Alert alert = new Alert(type);
         alert.setTitle(title);

@@ -24,7 +24,10 @@ public class CourseDAO {
             stmt.setString(1, course.getTitle());
             stmt.setString(2, course.getDescription());
             stmt.setDouble(4, course.getPrice());
+<<<<<<< HEAD
             stmt.setString(5, course.getCategory());
+=======
+>>>>>>> origin/main
             stmt.setString(6, course.getLevel());
             stmt.setString(7, course.getImageUrl());
 
@@ -50,7 +53,10 @@ public class CourseDAO {
             stmt.setString(1, course.getTitle());
             stmt.setString(2, course.getDescription());
             stmt.setDouble(4, course.getPrice());
+<<<<<<< HEAD
             stmt.setString(5, course.getCategory());
+=======
+>>>>>>> origin/main
             stmt.setString(6, course.getLevel());
             stmt.setString(7, course.getImageUrl());
             stmt.setInt(8, course.getId());
@@ -167,6 +173,14 @@ public class CourseDAO {
         return courses;
     }
 
+<<<<<<< HEAD
+=======
+
+
+
+
+
+>>>>>>> origin/main
     // Helper method to map ResultSet to Course object
     private Course mapResultSetToCourse(ResultSet rs) throws SQLException {
         Course course = new Course();

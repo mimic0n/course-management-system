@@ -5,27 +5,25 @@ import com.coursemanagement.dao.CourseDAO;
 import com.coursemanagement.dao.UserDAO;
 import com.coursemanagement.model.Course;
 import com.coursemanagement.model.User;
-import com.coursemanagement.util.DatabaseMaintenance;
-import com.coursemanagement.util.SessionManager;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import java.io.IOException;
 import java.util.List;
 import javafx.scene.control.cell.PropertyValueFactory;
-
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import java.util.Optional;
 
 public class AdminDashboardController {
-    @FXML
-    private Label welcomeLabel;
+
     @FXML
     private TableView<Course> courseTable;
     @FXML
@@ -40,6 +38,9 @@ public class AdminDashboardController {
     private TableColumn<Course, String> courseLevelColumn;
     @FXML
     private TableColumn<Course, String> courseCategoryColumn;
+    @FXML
+    private TableColumn<Course, String> courseImageUrlColumn;
+
 
     @FXML
     private TableView<User> userTable;
@@ -54,17 +55,16 @@ public class AdminDashboardController {
     @FXML
     private TableColumn<User, String> userFullNameColumn;
 
-    @FXML
-    private VBox enrollmentManagementView;
-    @FXML
-    private EnrollmentManagementController enrollmentManagementViewController;
-
 
     private CourseDAO courseDAO = new CourseDAO();
     private UserDAO userDAO = new UserDAO();
 
     public void initData(User currentUser) {
         if (currentUser != null && "ADMIN".equals(currentUser.getRole())) {
+            // Set window title with admin name
+//            Stage stage = (Stage) courseTable.getScene().getWindow();
+//            stage.setTitle("Admin Dashboard - " + currentUser.getFullName());
+            // Load data
             try {
                 loadCourses();
                 loadUsers();
@@ -74,6 +74,7 @@ public class AdminDashboardController {
                 e.printStackTrace();
             }
         } else {
+            // Show error and close window if non-admin tries to access
             showAlert(Alert.AlertType.ERROR, "Access Denied",
                     "You do not have permission to access this area.");
             Stage stage = (Stage) courseTable.getScene().getWindow();
@@ -87,11 +88,13 @@ public class AdminDashboardController {
     public void initialize() {
         System.out.println("Initializing AdminDashboardController...");
         if (courseLevelColumn == null) {
-            System.err.println("WARNING: courseLevelColumn is null in initialize()!");
+            System.err.println("FATAL: courseLevelColumn is null in initialize()!");
+            // You can print other @FXML fields too to see which ones are null
         }
         if (courseTable == null) {
-            System.err.println("WARNING: courseTable is null in initialize()!");
+            System.err.println("FATAL: courseTable is null in initialize()!");
         }
+
         // Course Table initialization
         courseIdColumn.setCellValueFactory(cellData -> cellData.getValue().idProperty().asObject());
         courseNameColumn.setCellValueFactory(cellData -> cellData.getValue().titleProperty());
@@ -99,13 +102,18 @@ public class AdminDashboardController {
         coursePriceColumn.setCellValueFactory(new PropertyValueFactory<>("price"));
         courseLevelColumn.setCellValueFactory(new PropertyValueFactory<>("level"));
         courseCategoryColumn.setCellValueFactory(new PropertyValueFactory<>("category"));
+        courseImageUrlColumn.setCellValueFactory(new PropertyValueFactory<>("imageUrl"));
+
         loadCourses();
+
         // User Table initialization
         userIdColumn.setCellValueFactory(cellData -> cellData.getValue().userIdProperty().asObject());
         userNameColumn.setCellValueFactory(cellData -> cellData.getValue().usernameProperty());
         userEmailColumn.setCellValueFactory(new PropertyValueFactory<>("email"));
         userFullNameColumn.setCellValueFactory(new PropertyValueFactory<>("fullName"));
         userRoleColumn.setCellValueFactory(new PropertyValueFactory<>("role"));
+
+        // Load data
         loadUsers();
 
     }
@@ -130,17 +138,18 @@ public class AdminDashboardController {
             AddCourseDialogController controller = loader.getController();
 
             Stage dialogStage = new Stage();
-            dialogStage.setTitle("Add New Course");
+            dialogStage.setTitle("Thêm khóa học mới");
             dialogStage.initModality(Modality.WINDOW_MODAL);
+            // dialogStage.initOwner(((Node)event.getSource()).getScene().getWindow()); // Đặt cửa sổ cha
             dialogStage.setScene(new Scene(root));
-            dialogStage.setResizable(true);
             dialogStage.showAndWait();
 
             if (controller.isCourseAdded()) {
-                loadCourses();
+                loadCourses(); // Tải lại danh sách khóa học sau khi thêm
             }
         } catch (IOException e) {
             e.printStackTrace();
+            // Xử lý lỗi
         }
     }
 
@@ -152,27 +161,22 @@ public class AdminDashboardController {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/EditCourseDialog.fxml"));
                 Parent root = loader.load();
                 EditCourseDialogController controller = loader.getController();
-                controller.setCourseToEdit(selectedCourse);
+                controller.setCourseToEdit(selectedCourse); // Truyền khóa học để chỉnh sửa
 
                 Stage dialogStage = new Stage();
-                dialogStage.setTitle("Edit Course");
+                dialogStage.setTitle("Chỉnh sửa khóa học");
                 dialogStage.initModality(Modality.WINDOW_MODAL);
                 dialogStage.setScene(new Scene(root));
-                dialogStage.setResizable(true);
                 dialogStage.showAndWait();
 
                 if (controller.isCourseUpdated()) {
-                    loadCourses();
+                    loadCourses(); // Tải lại danh sách khóa học sau khi sửa
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
         } else {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle(" Please Select a Course");
-            alert.setHeaderText(null);
-            alert.setContentText("Please select a course to edit.");
-            alert.showAndWait();
+            // Hiển thị thông báo yêu cầu chọn khóa học
         }
     }
 
@@ -181,21 +185,21 @@ public class AdminDashboardController {
         Course selectedCourse = courseTable.getSelectionModel().getSelectedItem();
         if (selectedCourse != null) {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setTitle(" Delete Course Confirmation");
-            alert.setHeaderText(" Confirm Deletion");
-            alert.setContentText(" You are about to delete the course: " + selectedCourse.getTitle() + ".\n" + "This action cannot be undone. Are you sure you want to proceed?");
+            alert.setTitle("Xác nhận xóa");
+            alert.setHeaderText("Xóa khóa học");
+            alert.setContentText("Bạn có chắc chắn muốn xóa khóa học này?");
 
             Optional<ButtonType> result = alert.showAndWait();
             if (result.isPresent() && result.get() == ButtonType.OK) {
                 if (courseDAO.delete(selectedCourse.getId())) {
                     loadCourses();
-                    showAlert(Alert.AlertType.INFORMATION, "Complete", " Course deleted successfully!");
+                    showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đã xóa khóa học thành công!");
                 } else {
-                    showAlert(Alert.AlertType.ERROR, "Error", " Could not delete course. Please try again later.");
+                    showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể xóa khóa học!");
                 }
             }
         } else {
-            showAlert(Alert.AlertType.WARNING, "Warning", " Please select a course to delete.");
+            showAlert(Alert.AlertType.WARNING, "Cảnh báo", "Vui lòng chọn khóa học cần xóa!");
         }
     }
 
@@ -207,10 +211,9 @@ public class AdminDashboardController {
             AddUserDialogController controller = loader.getController();
 
             Stage dialogStage = new Stage();
-            dialogStage.setTitle("Add New User");
+            dialogStage.setTitle("Thêm người dùng mới");
             dialogStage.initModality(Modality.WINDOW_MODAL);
             dialogStage.setScene(new Scene(root));
-            dialogStage.setResizable(true);
             dialogStage.showAndWait();
 
             if (controller.isUserAdded()) {
@@ -218,7 +221,7 @@ public class AdminDashboardController {
             }
         } catch (IOException e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Error", " Unable to open Add User dialog!");
+            showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể mở form thêm người dùng!");
         }
     }
 
@@ -233,7 +236,7 @@ public class AdminDashboardController {
                 controller.setUser(selectedUser);
 
                 Stage dialogStage = new Stage();
-                dialogStage.setTitle("Edit User");
+                dialogStage.setTitle("Chỉnh sửa người dùng");
                 dialogStage.initModality(Modality.WINDOW_MODAL);
                 dialogStage.setScene(new Scene(root));
                 dialogStage.showAndWait();
@@ -243,39 +246,33 @@ public class AdminDashboardController {
                 }
             } catch (IOException e) {
                 e.printStackTrace();
-                showAlert(Alert.AlertType.ERROR, "Error", "Unable to open Edit User dialog!");
+                showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể mở form chỉnh sửa!");
             }
         } else {
-            showAlert(Alert.AlertType.WARNING, "Warning", "Please select a user to edit.");
+            showAlert(Alert.AlertType.WARNING, "Cảnh báo", "Vui lòng chọn người dùng cần sửa!");
         }
     }
 
     @FXML
     private void handleDeleteUser() {
         User selectedUser = userTable.getSelectionModel().getSelectedItem();
-        if (selectedUser == null) {
-            showAlert(Alert.AlertType.WARNING, "Warning", "Please select a user to delete.");
-            return;
-        }
+        if (selectedUser != null) {
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Xác nhận xóa");
+            alert.setHeaderText("Xóa người dùng");
+            alert.setContentText("Bạn có chắc chắn muốn xóa người dùng này?");
 
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle(" Delete User ");
-        alert.setHeaderText(" Confirm Deletion " + selectedUser.getFullName() + "?");
-        alert.setContentText(" Are you sure you want to delete user: " + selectedUser.getFullName() + "?\n" + "This action cannot be undone.");
-
-        Optional<ButtonType> result = alert.showAndWait();
-
-        if (result.isPresent() && result.get() == ButtonType.OK) {
-            if (userDAO.delete(selectedUser.getUserId())) {
-                showAlert(Alert.AlertType.INFORMATION, "Complete", "User deleted successfully!");
-                loadUsers();
-                if (enrollmentManagementViewController != null) {
-                    enrollmentManagementViewController.loadEnrollments();
+            Optional<ButtonType> result = alert.showAndWait();
+            if (result.isPresent() && result.get() == ButtonType.OK) {
+                if (userDAO.delete(selectedUser.getUserId())) {
+                    loadUsers();
+                    showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đã xóa người dùng thành công!");
+                } else {
+                    showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể xóa người dùng!");
                 }
-
-            } else {
-                showAlert(Alert.AlertType.ERROR, "Error", " Could not delete user. Please try again later.");
             }
+        } else {
+            showAlert(Alert.AlertType.WARNING, "Cảnh báo", "Vui lòng chọn người dùng cần xóa!");
         }
     }
 
@@ -287,74 +284,8 @@ public class AdminDashboardController {
         alert.showAndWait();
     }
 
-    @FXML
-    private void logout() {
-        SessionManager.getInstance().logout();
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/login.fxml"));
-            Scene scene = new Scene(loader.load());
-            Stage stage = (Stage) welcomeLabel.getScene().getWindow();
-            stage.setScene(scene);
-            stage.setMaximized(false);
-            stage.centerOnScreen();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
-    @FXML
-    private void switchToMain() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/mainForAD.fxml"));
-            Scene scene = new Scene(loader.load());
-            MainController controller = loader.getController();
-            controller.initData(SessionManager.getInstance().getCurrentUser());
 
-            Stage stage = (Stage) courseTable.getScene().getWindow();
-            stage.setScene(scene);
-            stage.setMaximized(false);
-            stage.isResizable();
-            stage.centerOnScreen();
-        } catch (IOException e) {
-            e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Error", "Could not load main dashboard");
-        }
-    }
-
-    @FXML
-    private void handleDatabaseMaintenance() {
-        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmation.setTitle("Database Maintenance");
-        confirmation.setHeaderText("Database Reindexing");
-        confirmation.setContentText("This will update all IDs in the database. Continue?");
-
-        if (confirmation.showAndWait().get() == ButtonType.OK) {
-            try {
-                // First verify integrity
-                DatabaseMaintenance.verifyDatabaseIntegrity();
-
-                // Perform reindexing
-                DatabaseMaintenance.reindexDatabase();
-
-                // Verify again after reindexing
-                DatabaseMaintenance.verifyDatabaseIntegrity();
-
-                showAlert(Alert.AlertType.INFORMATION,
-                        "Success",
-                        "Database maintenance completed successfully");
-
-                // Refresh the tables
-                loadCourses();
-                loadUsers();
-
-            } catch (Exception e) {
-                showAlert(Alert.AlertType.ERROR,
-                        "Error",
-                        "Database maintenance failed: " + e.getMessage());
-                e.printStackTrace();
-            }
-        }
-    }
     public void setCourseLevelColumn(TableColumn<Course, String> courseLevelColumn) {
         this.courseLevelColumn = courseLevelColumn;
     }
